@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+
+.button-label {
+  color: #000000;
+  font-family: 'MS Mincho';
+  font-size: 28px;
+}
