@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Grid } from '@mui/material';
 import { TitleWrapper, Title, Label } from './styles'
 import Button from '../../components/button'
@@ -11,6 +11,8 @@ import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
 import '../../App.css'
 import Dialog from '../../components/dialog'
+import Popover from '@mui/material/Popover';
+import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 
 // const Item = styled(Paper)(({ theme }) => ({
 //     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -21,6 +23,55 @@ import Dialog from '../../components/dialog'
 //   }));
 
 function Main() {
+
+    const resetRef = useRef(null);
+    const [data, setdata] = useState({
+        id: "",
+        text: "",
+        displayType: "kanji"
+      });
+    
+    const [displayType, setdisplayType] = useState({
+        type: "kanji"
+    });
+
+    const fetchData = () => {
+        fetch("/data").then((res) => 
+      res.json().then((data) => {
+        setdata({
+          id: data.ID,
+          text: data.Text,
+          displayType: data.displayType
+        });
+      })
+    );
+
+    console.log(data.text)
+  };
+    function convertTextDisplay() {
+        
+    }
+
+    function swapData() {
+        fetch("/switch", {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify(data)
+        }).then((res) =>
+        res.json().then((data) => {
+            setdata({
+                id: data.ID,
+                text: data.Text,
+                displayType: data.displayType
+            });
+        })
+        );
+    };
+
+    // function resetClick() {
+
+    // }
+
     return (
         <Box sx={{ height: '100%' }} style={{backgroundColor: "#D2E3DF"}}>
             <Grid container direction="column" justifyContent="flex-start" alignItems="center">
@@ -37,7 +88,7 @@ function Main() {
                         <Grid item x={1}>
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="baseline">
                                 <Grid item>
-                                    <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'}/>
+                                    <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData}/>
                                     <h2 className='button-label'>Reset</h2>
                                 </Grid>
                                 <Grid item>
@@ -61,8 +112,8 @@ function Main() {
                 </Grid>
                 <Grid item xs={12} style={{marginTop:20}}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog/>
-                        <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={'Romaji'} imageWidth={20} tooltipText={'Switch between Japanese scripts'}/>
+                        <Dialog text={data.text}/>
+                        <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.displayType} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData}/>
                     </Grid>
                     
                 </Grid>
