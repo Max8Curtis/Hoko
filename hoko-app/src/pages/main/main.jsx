@@ -27,7 +27,8 @@ function Main() {
     const resetRef = useRef(null);
     const [data, setdata] = useState({
         id: "",
-        text: "",
+        displayText: "",
+        kanjiText: "",
         displayType: "kanji"
       });
     
@@ -40,32 +41,41 @@ function Main() {
       res.json().then((data) => {
         setdata({
           id: data.ID,
-          text: data.Text,
-          displayType: data.displayType
+          displayText: data.DisplayText,
+          kanjiText: data.KanjiText,
+          displayType: data.DisplayType
         });
       })
     );
 
-    console.log(data.text)
+    console.log(data.displayText)
   };
-    function convertTextDisplay() {
-        
-    }
 
     function swapData() {
-        fetch("/switch", {
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify(data)
-        }).then((res) =>
-        res.json().then((data) => {
+        if (data.displayType == 'romaji') {
             setdata({
-                id: data.ID,
-                text: data.Text,
-                displayType: data.displayType
+                id: data.id,
+                displayText: data.kanjiText,
+                kanjiText: data.kanjiText,
+                displayType: 'kanji'
             });
-        })
-        );
+        } else {
+            fetch("/switch", {
+                method: 'POST',
+                mode: 'cors',
+                body: JSON.stringify(data)
+            }).then((res) =>
+            res.json().then((data) => {
+                setdata({
+                    id: data.ID,
+                    displayText: data.DisplayText,
+                    kanjiText: data.KanjiText,
+                    displayType: data.DisplayType
+                });
+            })
+            );
+        }
+        
     };
 
     // function resetClick() {
@@ -112,7 +122,7 @@ function Main() {
                 </Grid>
                 <Grid item xs={12} style={{marginTop:20}}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.text}/>
+                        <Dialog text={data.displayText}/>
                         <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.displayType} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData}/>
                     </Grid>
                     

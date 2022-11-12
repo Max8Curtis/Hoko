@@ -11,11 +11,12 @@ parser.add_argument('title', required=True)
 
 
 @app.route('/data')
-def get_time():
+def return_data():
     return {
         'ID': "0",
-        'Text': "私は大学生です",
-        'displayType': 'kanji'
+        'DisplayText': "私は大学生です",
+        'KanjiText': "私は大学生です",
+        'DisplayType': 'kanji'
     }
 
 
@@ -26,7 +27,7 @@ def switch_kanji():
     print(data['displayType'])
     if data['displayType'] == 'kanji':
         kks = pk.kakasi()
-        result = kks.convert(data['text'])
+        result = kks.convert(data['displayText'])
         romaji_text = ""
         for word in result:
             romaji_text += word['hepburn'] + " "
@@ -34,8 +35,9 @@ def switch_kanji():
 
     return jsonify({
         'ID': data['id'],
-        'Text': romaji_text,
-        'displayType': 'romaji'
+        'DisplayText': romaji_text,
+        'KanjiText': data['kanjiText'],
+        'DisplayType': 'romaji'
     })
 
 
