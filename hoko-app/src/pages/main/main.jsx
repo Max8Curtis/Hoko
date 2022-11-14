@@ -30,26 +30,24 @@ function Main() {
         displayText: "",
         kanjiText: "",
         displayType: "kanji"
-      });
-    
+    });
+
     const [displayType, setdisplayType] = useState({
         type: "kanji"
     });
 
     const fetchData = () => {
-        fetch("/data").then((res) => 
-      res.json().then((data) => {
-        setdata({
-          id: data.ID,
-          displayText: data.DisplayText,
-          kanjiText: data.KanjiText,
-          displayType: data.DisplayType
-        });
-      })
-    );
-
-    console.log(data.displayText)
-  };
+        fetch("/data").then((res) =>
+            res.json().then((data) => {
+                setdata({
+                    id: data.ID,
+                    displayText: data.DisplayText,
+                    kanjiText: data.KanjiText,
+                    displayType: data.DisplayType
+                });
+            })
+        );
+    };
 
     function swapData() {
         if (data.displayType == 'romaji') {
@@ -65,6 +63,20 @@ function Main() {
                 mode: 'cors',
                 body: JSON.stringify(data)
             }).then((res) =>
+                res.json().then((data) => {
+                    setdata({
+                        id: data.ID,
+                        displayText: data.DisplayText,
+                        kanjiText: data.KanjiText,
+                        displayType: data.DisplayType
+                    });
+                })
+            );
+        }
+    };
+
+    function getSpeech() {
+        fetch("/speak").then((res) =>
             res.json().then((data) => {
                 setdata({
                     id: data.ID,
@@ -73,59 +85,66 @@ function Main() {
                     displayType: data.DisplayType
                 });
             })
-            );
-        }
-        
-    };
+        );
+    }
 
-    // function resetClick() {
-
-    // }
+    function undoMove() {
+        fetch("/undo").then((res) =>
+        res.json().then((data) => {
+            setdata({
+                id: data.ID,
+                displayText: data.DisplayText,
+                kanjiText: data.KanjiText,
+                displayType: data.DisplayType
+            });
+        })
+    );
+    }
 
     return (
-        <Box sx={{ height: '100%' }} style={{backgroundColor: "#D2E3DF"}}>
+        <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
             <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                 <Grid item xs={12}>
                     {/* <item>1</item> */}
-                    <h1 style={{fontSize: 60, fontFamily:'MS Mincho'}}>方向</h1>
+                    <h1 style={{ fontSize: 60, fontFamily: 'MS Mincho' }}>方向</h1>
                 </Grid>
                 <Grid item xs={12}>
                     {/* <item>2</item> */}
-                    <h2 style={{fontSize: 40, fontFamily:'MS Mincho'}}>Hōkō</h2>
+                    <h2 style={{ fontSize: 40, fontFamily: 'MS Mincho' }}>Hōkō</h2>
                 </Grid>
-                <Grid item xs={12} style={{marginTop:30}}>
+                <Grid item xs={12} style={{ marginTop: 30 }}>
                     <Grid container justifyContent="center" alignItems="center" spacing={12}>
                         <Grid item x={1}>
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="baseline">
                                 <Grid item>
-                                    <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData}/>
+                                    <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
                                     <h2 className='button-label'>Reset</h2>
                                 </Grid>
                                 <Grid item>
-                                    <Button item xs={1} bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'}/>
-                                    <h2 className='button-label' style={{paddingLeft:8}}>Undo</h2>
+                                    <Button item xs={1} bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
+                                    <h2 className='button-label' style={{ paddingLeft: 8 }}>Undo</h2>
                                 </Grid>
                                 <Grid item>
-                                    <Button item xs={1} bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'}/>
+                                    <Button item xs={1} bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={getSpeech} />
                                     <h2 className='button-label'>Speak</h2>
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item>
-                            <div style={{height:400, width:700,backgroundColor:'blue', borderRadius:8}}></div>
+                            <div style={{ height: 400, width: 700, backgroundColor: 'blue', borderRadius: 8 }}></div>
                         </Grid>
                         <Grid item>
-                            <Button item xs={1} bid={3} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'}/>
-                            <h2 className='button-label' style={{paddingLeft:8}}>Help</h2>
+                            <Button item xs={1} bid={3} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} />
+                            <h2 className='button-label' style={{ paddingLeft: 8 }}>Help</h2>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} style={{marginTop:20}}>
+                <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.displayText}/>
-                        <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.displayType} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData}/>
+                        <Dialog text={data.displayText} />
+                        <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.displayType} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
                     </Grid>
-                    
+
                 </Grid>
             </Grid>
         </Box>
