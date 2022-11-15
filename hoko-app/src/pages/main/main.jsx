@@ -32,10 +32,6 @@ function Main() {
         displayType: "kanji"
     });
 
-    const [displayType, setdisplayType] = useState({
-        type: "kanji"
-    });
-
     const fetchData = () => {
         fetch("/data").then((res) =>
             res.json().then((data) => {
@@ -144,7 +140,6 @@ function Main() {
                         <Dialog text={data.displayText} />
                         <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.displayType} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
                     </Grid>
-
                 </Grid>
             </Grid>
         </Box>
