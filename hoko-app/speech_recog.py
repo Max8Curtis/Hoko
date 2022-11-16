@@ -3,12 +3,13 @@ import requests
 import json
 import pykakasi
 from recorder import record_audio, read_audio
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 API_ENDPOINT = 'https://api.wit.ai/'
 API_FUNCTION_SPEECH = 'speech'
-
-wit_access_token = 'WITBGWYAKLMN6CEZOL3PZNZFSR4TM4QW'
-
 
 def recognize_speech(audiofile, duration):
 
@@ -16,7 +17,7 @@ def recognize_speech(audiofile, duration):
 
     audio = read_audio(audiofile)
 
-    headers = {'authorization': 'Bearer ' + wit_access_token,
+    headers = {'authorization': 'Bearer ' + os.getenv('WIT_ACCESS_TOKEN'),
                'Content-Type': 'audio/wav'}
 
     resp = requests.post(API_ENDPOINT+API_FUNCTION_SPEECH, headers=headers,
@@ -24,18 +25,15 @@ def recognize_speech(audiofile, duration):
     # print(resp.content)
     data = "["+resp.content.decode('utf-8')+"]"
     data = data.replace("}\r\n{", "},\r\n{")
-    # print(json.loads("["+resp.content.replace("}\n{", "},\n{") + "]"))
     data = json.loads(data)
-    # print(data)
-    print(data[0])
+    
 
     print(data)
     text = ''
-    if 'text' in data[0]:
-        text = data[0]['text']
+    if 'text' in data[len(data)-1]:
+        text = data[len(data)-1]['text']
     print(text)
 
-    # return the text from data response
     return text
 
 
