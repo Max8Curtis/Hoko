@@ -10,6 +10,7 @@ load_dotenv()
 
 API_ENDPOINT = 'https://api.wit.ai/'
 API_FUNCTION_SPEECH = 'speech'
+WIT_ACCESS_TOKEN = 'WITBGWYAKLMN6CEZOL3PZNZFSR4TM4QW'
 
 def recognize_speech(audiofile, duration):
 
@@ -17,7 +18,7 @@ def recognize_speech(audiofile, duration):
 
     audio = read_audio(audiofile)
 
-    headers = {'authorization': 'Bearer ' + os.getenv('WIT_ACCESS_TOKEN'),
+    headers = {'authorization': 'Bearer ' + WIT_ACCESS_TOKEN,
                'Content-Type': 'audio/wav'}
 
     resp = requests.post(API_ENDPOINT+API_FUNCTION_SPEECH, headers=headers,
