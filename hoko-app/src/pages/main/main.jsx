@@ -24,34 +24,47 @@ import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 
 function Main() {
 
+    const errorMsg = 'Your voice was unrecognizable, please repeat.'
+
     const resetRef = useRef(null);
     const [data, setdata] = useState({
-        id: "",
-        displayText: "",
-        kanjiText: "",
-        displayType: "kanji"
+        msgData: {
+            id: "",
+            displayText: "",
+            kanjiText: "",
+            displayType: "kanji",
+            error: {
+                displayError: false,
+                errorChars: []
+            }
+        }
     });
 
-    const fetchData = () => {
+    function fetchData() {
         fetch("/data").then((res) =>
             res.json().then((data) => {
                 setdata({
-                    id: data.ID,
-                    displayText: data.DisplayText,
-                    kanjiText: data.KanjiText,
-                    displayType: data.DisplayType
+                    msgData: data.message
                 });
             })
         );
+        console.log(data)
+        console.log(data.msgData)
     };
 
     function swapData() {
-        if (data.displayType == 'romaji') {
+        if (data.msgData['displayType'] == 'romaji') {
             setdata({
-                id: data.id,
-                displayText: data.kanjiText,
-                kanjiText: data.kanjiText,
-                displayType: 'kanji'
+                msgData: {
+                    id: data.msgData['id'],
+                    displayText: data.msgData['kanjiText'],
+                    kanjiText: data.msgData['kanjiText'],
+                    displayType: 'kanji',
+                    error: {
+                        displayError: data.msgData.error['displayError'],
+                        errorChars: data.msgData.error['errorChars']
+                    }
+                }
             });
         } else {
             fetch("/switch", {
@@ -61,10 +74,7 @@ function Main() {
             }).then((res) =>
                 res.json().then((data) => {
                     setdata({
-                        id: data.ID,
-                        displayText: data.DisplayText,
-                        kanjiText: data.KanjiText,
-                        displayType: data.DisplayType
+                        msgData: data.message
                     });
                 })
             );
@@ -75,10 +85,7 @@ function Main() {
         fetch("/speak").then((res) =>
             res.json().then((data) => {
                 setdata({
-                    id: data.ID,
-                    displayText: data.DisplayText,
-                    kanjiText: data.KanjiText,
-                    displayType: data.DisplayType
+                    msgData: data.message
                 });
             })
         );
@@ -88,10 +95,7 @@ function Main() {
         fetch("/undo").then((res) =>
         res.json().then((data) => {
             setdata({
-                id: data.ID,
-                displayText: data.DisplayText,
-                kanjiText: data.KanjiText,
-                displayType: data.DisplayType
+                msgData: data.message
             });
         })
     );
@@ -137,8 +141,15 @@ function Main() {
                 </Grid>
                 <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.displayText} />
-                        <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.displayType} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
+                        <Dialog text={data.msgData['displayText']} />
+                        <Grid container direction="row" justifyContent="space-between">
+                            <div>
+                                {data.msgData['error']['displayError'] &&
+                                    <p style={{color: "red"}}>{errorMsg}</p>                                    
+                                }
+                            </div>
+                            <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.msgData['displayType']} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>
