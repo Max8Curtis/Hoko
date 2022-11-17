@@ -26,7 +26,7 @@ def recognize_speech(audiofile, duration):
     data = "["+resp.content.decode('utf-8')+"]"
     data = data.replace("}\r\n{", "},\r\n{")
     data = json.loads(data)
-    
+
 
     print(data)
     text = ''
