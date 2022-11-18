@@ -9,6 +9,7 @@ import resetImage from '../../assets/restart_icon.png'
 import micImage from '../../assets/mic_icon.png'
 import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
+import stopImage from '../../assets/stop_icon.png'
 import '../../App.css'
 import Dialog from '../../components/dialog'
 import Popover from '@mui/material/Popover';
@@ -24,7 +25,15 @@ import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 
 function Main() {
 
-    const errorMsg = 'Your voice was unrecognizable, please repeat.'
+    const errorMsg = 'Your voice was unrecognizable, please repeat.';
+    const speakingTooltip = 'Speak to move character'
+    const stopTooltip = 'Stop recording speech'
+    const [speak, setspeak] = useState({
+        speaking: false,
+        image: micImage,
+        func: getSpeech,
+        tooltip: speakingTooltip
+    });
 
     const resetRef = useRef(null);
     const [data, setdata] = useState({
@@ -81,6 +90,16 @@ function Main() {
         }
     };
 
+    function stopSpeaking() {
+        //pass
+        setspeak({
+            speaking: false,
+            image: micImage,
+            func: getSpeech,
+            tooltip: speakingTooltip
+        })
+    }
+
     function getSpeech() {
         fetch("/speak").then((res) =>
             res.json().then((data) => {
@@ -89,6 +108,12 @@ function Main() {
                 });
             })
         );
+        setspeak({
+            speaking: true,
+            image: stopImage,
+            func: stopSpeaking,
+            tooltip: stopTooltip
+        })
     }
 
     function undoMove() {
@@ -117,16 +142,24 @@ function Main() {
                         <Grid item x={1}>
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="baseline">
                                 <Grid item>
-                                    <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
-                                    <h2 className='button-label'>Reset</h2>
+                                    <Grid container direction="column" alignItems="center">
+                                        <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
+                                        <h2 className='button-label'>Reset</h2>
+                                    </Grid>
                                 </Grid>
                                 <Grid item>
-                                    <Button item xs={1} bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
-                                    <h2 className='button-label' style={{ paddingLeft: 8 }}>Undo</h2>
+                                    <Grid container direction="column" alignItems="center">
+                                        <Button item xs={1} bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
+                                        <h2 className='button-label' style={{ paddingLeft: 8 }}>Undo</h2>
+                                    </Grid>
                                 </Grid>
-                                <Grid item>
-                                    <Button item xs={1} bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={getSpeech} />
-                                    <h2 className='button-label'>Speak</h2>
+                                <Grid item alignItems="center">
+                                    <Grid container direction="column" alignItems="center">
+                                        <Button item xs={1} bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={speak.func} />
+                                        <h2 className='button-label'>
+                                            {speak.speaking ? 'Stop'  : 'Speak'}
+                                        </h2>   
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -134,8 +167,20 @@ function Main() {
                             <div style={{ height: 400, width: 700, backgroundColor: 'blue', borderRadius: 8 }}></div>
                         </Grid>
                         <Grid item>
-                            <Button item xs={1} bid={3} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} />
-                            <h2 className='button-label' style={{ paddingLeft: 8 }}>Help</h2>
+                            <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
+                                <Grid item>
+                                    <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
+                                        <h2 className='button-label'>Target:</h2>
+                                        <div style={{ height: 80, width: 80, backgroundColor: 'blue', borderRadius: 4, marginBottom: 130 }}></div>
+                                    </Grid>
+                                </Grid>
+                                <Grid item>
+                                    <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
+                                        <Button item xs={1} bid={3} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} />
+                                        <h2 className='button-label'>Help</h2>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>

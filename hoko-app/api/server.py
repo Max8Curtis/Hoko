@@ -11,6 +11,7 @@ print(path)
 sys.path.insert(0, path)
 
 from speech import example
+from speech import classes
 
 # sys.path.insert(0, '..')
 # from speech import example
@@ -20,54 +21,52 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 
-@app.route('/speak')
-def new_speech():
-    kanji_text = example.get_user_speech()
-    return {
-        'ID': "0",
-        'DisplayText': kanji_text,
-        'KanjiText': kanji_text,
-        'DisplayType': 'kanji'
-    }
-
-
+## Test endpoint
 @app.route('/data')
 def return_data():
+    data = example.get_example_text()
     return {
-        'ID': "0",
-        'DisplayText': "私は大学生です",
-        'KanjiText': "私は大学生です",
-        'DisplayType': 'kanji'
+        'message': data
     }
 
 
+@app.route('/reset')
+def reset_game():
+    return {
+        'message': data
+    }
+
+@app.route('/speak')
+def new_speech():
+    kanji_text, display_error, error_chars = example.get_user_speech()
+    return {
+        'message': data
+    }
+
+# Switch the script used for displaying text
 @app.route('/switch', methods=['POST'])
 def switch_kanji():
     data = json.loads(request.data)
-    print(data['displayType'])
-    if data['displayType'] == 'kanji':
+    if data['msgData']['displayType'] == 'kanji':
         kks = pk.kakasi()
-        result = kks.convert(data['displayText'])
+        result = kks.convert(data['msgData']['displayText'])
         romaji_text = ""
         for word in result:
             romaji_text += word['hepburn'] + " "
         romaji_text = romaji_text[:len(romaji_text)-1]
 
-    return jsonify({
-        'ID': data['id'],
-        'DisplayText': romaji_text,
-        'KanjiText': data['kanjiText'],
-        'DisplayType': 'romaji'
-    })
+    newMsgError = classes.Error(True, [])
+    newMsgData = classes.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
+    print(newMsgData.to_json())
+    return {
+        'message': newMsgData.to_json()
+    }
 
 @app.route('/undo')
 def retrieve_previous():
-    previous_text = example.get_previous_text()
+    previousText = example.get_previous_text()
     return {
-        'ID': "0",
-        'DisplayText': previous_text,
-        'KanjiText': previous_text,
-        'DisplayType': 'kanji'
+        'message': previousText
     }
 
 
