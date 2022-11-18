@@ -11,7 +11,7 @@ print(path)
 sys.path.insert(0, path)
 
 from speech import example
-from speech import classes
+from speech import structure
 
 # sys.path.insert(0, '..')
 # from speech import example
@@ -55,8 +55,8 @@ def switch_kanji():
             romaji_text += word['hepburn'] + " "
         romaji_text = romaji_text[:len(romaji_text)-1]
 
-    newMsgError = classes.Error(True, [])
-    newMsgData = classes.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
+    newMsgError = structure.Error(True, [])
+    newMsgData = structure.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
     print(newMsgData.to_json())
     return {
         'message': newMsgData.to_json()
