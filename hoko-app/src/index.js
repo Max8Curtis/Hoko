@@ -4,9 +4,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.css';
-import Map from './components/map'
-import Buttons from './components/buttons'
-import Dialog from './components/dialog'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

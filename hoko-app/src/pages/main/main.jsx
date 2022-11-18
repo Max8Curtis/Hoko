@@ -26,8 +26,8 @@ import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 function Main() {
 
     const errorMsg = 'Your voice was unrecognizable, please repeat.';
-    const speakingTooltip = 'Speak to move character'
-    const stopTooltip = 'Stop recording speech'
+    const speakingTooltip = 'Speak to move character';
+    const stopTooltip = 'Stop recording speech';
     const [speak, setspeak] = useState({
         speaking: false,
         image: micImage,
@@ -124,6 +124,7 @@ function Main() {
             });
         })
     );
+    console.log(data.msgData)
     }
 
     return (
@@ -186,7 +187,7 @@ function Main() {
                 </Grid>
                 <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.msgData['displayText']} />
+                        <Dialog text={data.msgData['displayText']} width={600} rows={4}/>
                         <Grid container direction="row" justifyContent="space-between">
                             <div>
                                 {data.msgData['error']['displayError'] &&
