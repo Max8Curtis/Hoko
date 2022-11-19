@@ -13,8 +13,6 @@ sys.path.insert(0, path)
 from speech import example
 from speech import structure
 
-# sys.path.insert(0, '..')
-# from speech import example
 app = Flask("AppAPI")
 api = Api(app)
 
@@ -29,6 +27,13 @@ def return_data():
         'message': data
     }
 
+@app.route('/start')
+def start_game():
+    config = example.new_config([1,2,3,4,5,6,7,8,9])
+    print(config)
+    return {
+        'message': config
+    }
 
 @app.route('/reset')
 def reset_game():
@@ -55,7 +60,7 @@ def switch_kanji():
             romaji_text += word['hepburn'] + " "
         romaji_text = romaji_text[:len(romaji_text)-1]
 
-    newMsgError = structure.Error(True, [])
+    newMsgError = structure.Error(False, [])
     newMsgData = structure.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
     print(newMsgData.to_json())
     return {

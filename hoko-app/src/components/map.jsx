@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 
-class Map extends Component {
-    render() { 
-        return <h1>Hello World</h1>;
-    }
+function Map({image, character, width}) { 
+        return (
+            <div>
+                <img src={image} style={{ width: width, heigh: '100%'}}/>
+            </div>
+        );
 }
  
 export default Map;

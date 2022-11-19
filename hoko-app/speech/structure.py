@@ -25,3 +25,12 @@ class Error:
             'displayError': self.display_error,
             'errorChars': self.error_chars
         }
+
+class Config:
+    def __init__(self, target):
+        self.target = target
+
+    def to_json(self):
+        return {
+            'target': self.target
+        }

@@ -1,4 +1,5 @@
 from . import structure
+import random
 
 def add_two(a, b):
     return a + b
@@ -15,3 +16,8 @@ def get_example_text():
     error = structure.Error(False, [1, 3])
     data = structure.Data(0, 'この店は大きいですね', 'この店は大きいですね', 'kanji', error)
     return data.to_json()
+
+def new_config(targets):
+    target = random.choice(targets)
+    config = structure.Config(target)
+    return config.to_json()
