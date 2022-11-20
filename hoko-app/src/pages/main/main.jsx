@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Grid } from '@mui/material';
 import { TitleWrapper, Title, Label } from './styles'
-import Popup from 'reactjs-popup';
-import 'reactjs-popup/dist/index.css';
 
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
@@ -11,6 +9,8 @@ import Box from '@mui/material/Box';
 import Button from '../../components/button'
 import Map from '../../components/map'
 import Target from '../../components/target'
+import Popup from '../../components/popup'
+import PopupImage from '../../components/popup-image'
 
 import resetImage from '../../assets/restart_icon.png'
 import micImage from '../../assets/mic_icon.png'
@@ -32,14 +32,13 @@ import Cinema from '../../assets/map/cinema.png'
 import Grocery from '../../assets/map/grocery.png'
 import Hospital from '../../assets/map/hospital.png'
 import Lake from '../../assets/map/lake.png'
-import Osakeya from '../../assets/map/osake_ya.png'
+import SakeShop from '../../assets/map/sake_shop.png'
 import Parking from '../../assets/map/parking.png'
-import Sakanaya from '../../assets/map/sakana_ya.png'
+import FishShop from '../../assets/map/fish_shop.png'
 import Shrine from '../../assets/map/shrine.png'
 
 function Main() {
-
-    const resetRef = useRef(null);
+   
     
     const targets = {
         1: {
@@ -68,8 +67,8 @@ function Main() {
             japanese: 'みずうみ'
         },
         6: {
-            name: 'Osakeya',
-            image: Osakeya,
+            name: 'Sake shop',
+            image: SakeShop,
             japanese: 'おさけや'
         },
         7: {
@@ -78,8 +77,8 @@ function Main() {
             japanese: 'パーキング'
         },
         8: {
-            name: 'Sakanaya',
-            image: Sakanaya,
+            name: 'Fish shop',
+            image: FishShop,
             japanese: 'さかなや'
         },
         9: {
@@ -100,9 +99,10 @@ function Main() {
         tooltip: speakingTooltip
     });
 
+    //Default target to 1 so page loads
     const [gameConfig, setgameConfig] = useState({
         config: {
-            target: '',
+            target: 1
         }
     });
 
@@ -118,6 +118,12 @@ function Main() {
             }
         }
     });
+
+    const [isOpen, setisOpen] = useState(false);
+
+    function togglePopup() {
+        setisOpen(!isOpen);
+    }
 
     //Can upgrade to a POST, sending number of targets to choose from
     function startGame() {
@@ -211,6 +217,8 @@ function Main() {
     console.log(data.msgData)
     }
 
+    console.log(targets[gameConfig.config['target']]['image'])
+
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
             <Grid container direction="column" justifyContent="flex-start" alignItems="center">
@@ -222,10 +230,10 @@ function Main() {
                     {/* <item>2</item> */}
                     <h2 style={{ fontSize: 40, fontFamily: 'MS Mincho' }}>Hōkō</h2>
                 </Grid>
-                <Grid item xs={12} style={{ marginTop: 30 }}>
-                    <Grid container justifyContent="center" alignItems="center" spacing={12}>
+                <Grid item style={{ marginTop: 15 }}>
+                    <Grid container direction="row" justifyContent="space-between" alignItems="center" spacing={12}>
                         <Grid item x={1}>
-                            <Grid container justifyContent="center" direction="column" spacing={2} alignItems="baseline">
+                            <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
                                         <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
@@ -235,7 +243,7 @@ function Main() {
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
                                         <Button item xs={1} bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
-                                        <h2 className='button-label' style={{ paddingLeft: 8 }}>Undo</h2>
+                                        <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
@@ -248,15 +256,57 @@ function Main() {
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item xs={1} bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} />
+                                        <Button item xs={1} bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={togglePopup} />
                                         <h2 className='button-label'>Help</h2>
-                                    </Grid>
-                                
+                                        {isOpen && <Popup
+                                            content={
+                                                <>
+                                                    <Box sx={{ height: '100%' }}>
+                                                        <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+                                                            <h2>How to play</h2>
+                                                            <br></br>
+                                                            <p>1. Press Start - a random target will be generated</p>
+                                                            <p>2. Press Speak - speak directions in Japanese to move the character around the map towards the target</p>
+                                                            <p>     (Saying "go forward" will move the character forward by one square)</p>
+                                                            <p>3. When the character is facing the target, you have completed the game!</p>
+                                                            <h3>Pronunciation</h3>
+                                                            <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
+                                                            <p>If part of your speech is unrecognizable, the relevant part will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is recognizable!</p>
+                                                            <h3>Targets</h3>
+                                                            <div>                                                           
+                                                                <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
+                                                                    <Grid item>
+                                                                        <Grid container direction="row" justifyContent="space-between" alignItems="center">
+                                                                            <PopupImage targets={targets} targetNumber={1} />
+                                                                            <PopupImage targets={targets} targetNumber={2} />
+                                                                            <PopupImage targets={targets} targetNumber={3} />
+                                                                            <PopupImage targets={targets} targetNumber={4} />                                                                   
+                                                                        </Grid>                                                                  
+                                                                    </Grid>
+                                                                    <Grid item>
+                                                                        <Grid container direction="row" justifyContent="flex-start" alignItems="center">
+                                                                            <PopupImage targets={targets} targetNumber={5} /> 
+                                                                            <PopupImage targets={targets} targetNumber={6} /> 
+                                                                            <PopupImage targets={targets} targetNumber={7} /> 
+                                                                            <PopupImage targets={targets} targetNumber={8} /> 
+                                                                            <PopupImage targets={targets} targetNumber={9} /> 
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Grid>                                                                                                      
+                                                            </div>
+                                                        </Grid> 
+                                                    </Box>
+                                                </>
+                                            }
+                                            handleClose={togglePopup}
+                                            />
+                                        }
+                                    </Grid>                                
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item>
-                            <Map image={mapImage} character={charImage} width={650}/>
+                            <Map image={mapImage} character={charImage} width={700}/>
                         </Grid>
                         <Grid item>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
@@ -274,8 +324,7 @@ function Main() {
                                         <Button item xs={1} bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame}/>
                                         <h2 className='button-label'>Start</h2>
                                     </Grid>
-                                </Grid>
-                                
+                                </Grid>                               
                             </Grid>
                         </Grid>
                     </Grid>
