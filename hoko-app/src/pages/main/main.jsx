@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Grid } from '@mui/material';
 import { TitleWrapper, Title, Label } from './styles'
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
