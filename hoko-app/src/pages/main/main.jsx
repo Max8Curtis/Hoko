@@ -221,7 +221,7 @@ function Main() {
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
-            <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+            <Grid container direction="column" justifyContent="center" alignItems="center">
                 <Grid item xs={12}>
                     {/* <item>1</item> */}
                     <h1 style={{ fontSize: 60, fontFamily: 'MS Mincho' }}>方向</h1>
@@ -230,25 +230,25 @@ function Main() {
                     {/* <item>2</item> */}
                     <h2 style={{ fontSize: 40, fontFamily: 'MS Mincho' }}>Hōkō</h2>
                 </Grid>
-                <Grid item style={{ marginTop: 15 }}>
-                    <Grid container direction="row" justifyContent="space-between" alignItems="center" spacing={12}>
-                        <Grid item x={1}>
+                <Grid item xs={12} style={{ marginTop: 15 }}>
+                    <Grid container direction="row" alignItems="center" columnSpacing={{md:19}}>
+                        <Grid item xs={2.3}>
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item xs={1} bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item xs={1} bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item xs={1} bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={speak.func} />
+                                        <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={speak.func} />
                                         <h2 className='button-label'>
                                             {speak.speaking ? 'Stop'  : 'Speak'}
                                         </h2>   
@@ -256,7 +256,7 @@ function Main() {
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item xs={1} bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={togglePopup} />
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={togglePopup} />
                                         <h2 className='button-label'>Help</h2>
                                         {isOpen && <Popup
                                             content={
@@ -305,23 +305,32 @@ function Main() {
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item>
-                            <Map image={mapImage} character={charImage} width={700}/>
+                        <Grid item xs={7.4}>
+                            <Map image={mapImage} character={charImage} width={700} style={{paddingLeft:50}}/>
                         </Grid>
-                        <Grid item>
+                        <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center" style={{marginBottom: 60}}>
-                                        <h2 className='button-label'>Target:</h2>
-                                        <div style={{height: 80, width: 80, borderRadius: 4, border: '1px solid black'}}>
-                                            <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4}/>
-                                        </div>
-                                        <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
+                                        <Grid item>
+                                            <h2 className='button-label'>Target:</h2>
+                                        </Grid>
+                                        <Grid item>
+                                            <div style={{height: 80, width: 80, borderRadius: 4, border: '1px solid black'}}>
+                                                <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4}/>
+                                                
+                                            </div>
+                                        </Grid>
+                                        <Grid item>
+                                            <div style={{width:150, maxWidth:150, textAlign:'center'}}>
+                                                <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
+                                            </div>
+                                        </Grid>                   
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item xs={1} bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame}/>
+                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame}/>
                                         <h2 className='button-label'>Start</h2>
                                     </Grid>
                                 </Grid>                               
@@ -329,7 +338,7 @@ function Main() {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} style={{ marginTop: 20 }}>
+                <Grid item xs={12} style={{ marginTop: 20}}>
                     <Grid container direction="column" alignItems="flex-end">
                         <Dialog text={data.msgData['displayText']} width={600} rows={4}/>
                         <Grid container direction="row" justifyContent="space-between">
@@ -338,7 +347,7 @@ function Main() {
                                     <p style={{color: "red"}}>{errorMsg}</p>                                    
                                 }
                             </div>
-                            <Button item xs={1} bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.msgData['displayType']} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.msgData['displayType']} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
                         </Grid>
                     </Grid>
                 </Grid>
