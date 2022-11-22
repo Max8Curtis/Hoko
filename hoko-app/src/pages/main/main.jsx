@@ -38,8 +38,16 @@ import FishShop from '../../assets/map/fish_shop.png'
 import Shrine from '../../assets/map/shrine.png'
 
 function Main() {
+
+    let mapImageHeight = 770;
+    let mapImageWidth = 1070;
+    let mapImageDisplayWidth = 700;
+    let mapImageDisplayHeight = (mapImageDisplayWidth / mapImageWidth) * mapImageHeight
+
+    function Capitalize(str){
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
    
-    
     const targets = {
         1: {
             name: 'Bank',
@@ -125,6 +133,7 @@ function Main() {
         setisOpen(!isOpen);
     }
 
+    //API functions
     //Can upgrade to a POST, sending number of targets to choose from
     function startGame() {
         fetch('/start').then((res) =>
@@ -134,11 +143,8 @@ function Main() {
                 });
             })
         );
-        console.log(gameConfig.config)
-        console.log(targets[gameConfig.config['target']])
     }
     
-    //API functions
     function fetchData() {
         fetch("/data").then((res) =>
             res.json().then((data) => {
@@ -147,8 +153,6 @@ function Main() {
                 });
             })
         );
-        console.log(data)
-        console.log(data.msgData)
     };
 
     function swapData() {
@@ -214,10 +218,8 @@ function Main() {
             });
         })
     );
-    console.log(data.msgData)
-    }
 
-    console.log(targets[gameConfig.config['target']]['image'])
+    }
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -306,7 +308,7 @@ function Main() {
                             </Grid>
                         </Grid>
                         <Grid item xs={7.4}>
-                            <Map image={mapImage} character={charImage} width={700} style={{paddingLeft:50}}/>
+                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charX={1} charY={1} rotation={0} style={{paddingLeft:50}}/>
                         </Grid>
                         <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
@@ -347,7 +349,7 @@ function Main() {
                                     <p style={{color: "red"}}>{errorMsg}</p>                                    
                                 }
                             </div>
-                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={data.msgData['displayType']} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={22} buttonText={Capitalize(data.msgData['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
                         </Grid>
                     </Grid>
                 </Grid>

@@ -9,11 +9,16 @@ function Button({bid, buttonImage, buttonWidth, buttonHeight, buttonText, imageW
             <Tooltip title={tooltipText} placement="right" arrow>
                 <button style={{width: buttonWidth, height: buttonHeight, borderRadius: 8}} onClick={handleClick}>
                     <div className="flex-container">
-                        <p style={{marginTop: -5}}>{buttonText}</p>
+                        {buttonText?.length &&
+                            <div style={{width: 30, marginRight:18}}>
+                                <p style={{marginTop: -5}}>{buttonText}</p>
+                            </div>
+                        }
+                        
                         <img src={buttonImage} style={{paddingLeft: 5, width: imageWidth, height: '100%'}}></img>
                     </div>
                 </button>
-                </Tooltip>
+            </Tooltip>
         </div>
     );
 }
