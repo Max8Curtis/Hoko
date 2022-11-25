@@ -35,6 +35,8 @@ def start_game():
         'message': config
     }
 
+@app.route('/turn')
+
 @app.route('/reset')
 def reset_game():
     return {

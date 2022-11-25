@@ -39,6 +39,46 @@ import Shrine from '../../assets/map/shrine.png'
 
 function Main() {
 
+    const [audio, setAudio] = useState({
+        audioDetails: {
+            url: null,
+            blob: null,
+            chunks: null,
+            duration: {
+                h: 0,
+                m: 0,
+                s: 0
+            }
+        }
+    });
+
+    function handleAudioStop(data){
+        console.log(data)
+        setAudio({ audioDetails: data });
+    }
+    
+    function handleAudioUpload(file) {
+        console.log(file);
+    }
+    
+    function handleCountDown(data) {
+        console.log(data);
+    }
+    
+    function handleReset() {
+        const reset = {
+            url: null,
+            blob: null,
+            chunks: null,
+            duration: {
+                h: 0,
+                m: 0,
+                s: 0
+            }
+        };
+        setAudio({ audioDetails: reset });
+    }
+    
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
@@ -253,7 +293,7 @@ function Main() {
                                         <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={speak.func} />
                                         <h2 className='button-label'>
                                             {speak.speaking ? 'Stop'  : 'Speak'}
-                                        </h2>   
+                                        </h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
