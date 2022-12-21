@@ -5,15 +5,21 @@ MAPS = "./game_maps.json"
 
 class Game:
     def __init__(self, target_x, target_y):
-        self.char = Character(5, 3, 0)
+        
         self.prev_text = ""
         self.cur_text = ""
         self.target_x = target_x, self.target_y = target_y
         self.map = Map()
-        self.place_character()
+        char_start_y, char_start_x = self.place_character()
+        self.char = Character(char_start_y, char_start_x, 0)
 
     def place_character(self):
-        self.map['layout'][self.char.get_x()][self.char.get_y()] = "c"
+        map_data = self.map['layout']
+        for i in range(len(map_data)):
+            for j in range(len(map_data[i])):
+                if map_data[i][j] == "S":
+                    self.map['layout'][i][j] = "c"
+        return i, j
 
     def update_text(self, text):
         self.prev_text = self.cur_text
@@ -21,6 +27,11 @@ class Game:
 
     def load_prev_text(self):
         return self.prev_text
+
+    def reset_game(self):
+        self.char = Character(char_start_y, char_start_x, 0)
+        self.prev_text = ""
+        self.cur_text = ""
 
 class Map:
     def __init__(self):
@@ -47,8 +58,6 @@ class Map:
 
         return self.map
         
-
-
 map = Map()
 
 class Character:

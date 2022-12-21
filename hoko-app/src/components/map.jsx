@@ -53,7 +53,7 @@ function Map({image, character, width, height, charX, charY, rotation}) {
                                     <MapSquare width={width} height={height} displayChar={false} rotation={0} character={character}/>
                                 </Grid>
                                 <Grid item id="2 3">
-                                    <MapSquare width={width} height={height} displayChar={false} rotation={90} character={character}/>
+                                    <MapSquare width={width} height={height} displayChar={false} rotation={180} character={character}/>
                                 </Grid>
                                 <Grid item id="3 3">
                                     <MapSquare width={width} height={height} displayChar={false} rotation={0} character={character}/>
