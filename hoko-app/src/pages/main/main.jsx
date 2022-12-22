@@ -37,6 +37,8 @@ import Parking from '../../assets/map/parking.png'
 import FishShop from '../../assets/map/fish_shop.png'
 import Shrine from '../../assets/map/shrine.png'
 
+import white_square from '../../assets/white_square.png'
+
 function Main() {
 
     const [audio, setAudio] = useState({
@@ -89,47 +91,47 @@ function Main() {
     }
    
     const targets = {
-        1: {
+        "bank": {
             name: 'Bank',
             image: Bank,
             japanese: 'ぎんこう'
         },
-        2: {
+        "cinema": {
             name: 'Cinema',
             image: Cinema,
             japanese: 'えいがかん'
         },
-        3: {
+        "grocery": {
             name: 'Grocery',
             image: Grocery,
             japanese: 'スーパー'
         },
-        4: {            
+        "hospital": {            
             name: 'Hospital',
             image: Hospital,
             japanese: 'びょういん'
         },
-        5: {
+        "lake": {
             name: 'Lake',
             image: Lake,
             japanese: 'みずうみ'
         },
-        6: {
+        "sake shop": {
             name: 'Sake shop',
             image: SakeShop,
             japanese: 'おさけや'
         },
-        7: {
+        "parking": {
             name: 'Parking',
             image: Parking,
             japanese: 'パーキング'
         },
-        8: {
+        "fish shop": {
             name: 'Fish shop',
             image: FishShop,
             japanese: 'さかなや'
         },
-        9: {
+        "shrine": {
             name: 'Shrine',
             image: Shrine,
             japanese: 'じんじゃ'
@@ -150,10 +152,11 @@ function Main() {
     //Default target to 1 so page loads
     const [gameConfig, setgameConfig] = useState({
         config: {
-            target: 1
+            target: "",
+            map: {}
         }
     });
-
+    // console.log(gameConfig.config['target']['image'])
     const [data, setdata] = useState({
         msgData: {
             id: "",
@@ -177,12 +180,13 @@ function Main() {
     //Can upgrade to a POST, sending number of targets to choose from
     function startGame() {
         fetch('/start').then((res) =>
-            res.json().then((data) => {
+            res.json().then((gameConfig) => {
                 setgameConfig({
-                    config: data.message
+                    config: gameConfig.message
                 });
             })
         );
+        console.log(gameConfig)
     }
     
     function fetchData() {
@@ -359,13 +363,24 @@ function Main() {
                                         </Grid>
                                         <Grid item>
                                             <div style={{height: 80, width: 80, borderRadius: 4, border: '1px solid black'}}>
-                                                <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4}/>
-                                                
+                                                {gameConfig.config['target'] != "" &&
+                                                    <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4}/>
+                                                }
+                                                {gameConfig.config['target'] == "" &&
+                                                    <Target chosenTarget={white_square} borderRadius={4}/>
+                                                }
+                                                                                                
                                             </div>
                                         </Grid>
                                         <Grid item>
                                             <div style={{width:150, maxWidth:150, textAlign:'center'}}>
-                                                <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
+                                                
+                                                {gameConfig.config['target'] != "" &&
+                                                    <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
+                                                }
+                                                {gameConfig.config['target'] == "" &&
+                                                    <h2 className='button-label'>-</h2>
+                                                }
                                             </div>
                                         </Grid>                   
                                     </Grid>

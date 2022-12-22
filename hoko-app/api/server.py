@@ -20,6 +20,8 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 
+game = game_structs.Game()
+
 class API:
     ## Test endpoint
     @app.route('/data')
@@ -31,19 +33,21 @@ class API:
 
     @app.route('/start')
     def start_game():
-        self.game = game_structs.Game()
+        game = game_structs.Game()
+        config = game.to_json()
+        print(config)
         # config = example.new_config([1,2,3,4,5,6,7,8,9])
         return {
-            'message': self.game.to_json()
+            'message': config
         }
 
     @app.route('/turn')
 
     @app.route('/reset')
     def reset_game():
-        self.game.reset_game()
+        game.reset_game()
         return {
-            'message': self.game.to_json()
+            'message': game.to_json()
         }
 
     @app.route('/speak')
