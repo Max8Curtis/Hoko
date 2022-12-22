@@ -12,6 +12,7 @@ sys.path.insert(0, path)
 
 from speech import example
 from speech import structure
+from speech import game_structs
 
 app = Flask("AppAPI")
 api = Api(app)
@@ -19,63 +20,64 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 
-## Test endpoint
-@app.route('/data')
-def return_data():
-    data = example.get_example_text()
-    return {
-        'message': data
-    }
+class API:
+    ## Test endpoint
+    @app.route('/data')
+    def return_data():
+        data = example.get_example_text()
+        return {
+            'message': data
+        }
 
-@app.route('/start')
-def start_game():
-    config = example.new_config([1,2,3,4,5,6,7,8,9])
-    print(config)
-    return {
-        'message': config
-    }
+    @app.route('/start')
+    def start_game():
+        self.game = game_structs.Game()
+        # config = example.new_config([1,2,3,4,5,6,7,8,9])
+        return {
+            'message': self.game.to_json()
+        }
 
-@app.route('/turn')
+    @app.route('/turn')
 
-@app.route('/reset')
-def reset_game():
-    return {
-        'message': data
-    }
+    @app.route('/reset')
+    def reset_game():
+        self.game.reset_game()
+        return {
+            'message': self.game.to_json()
+        }
 
-@app.route('/speak')
-def new_speech():
-    kanji_text, display_error, error_chars = example.get_user_speech()
-    return {
-        'message': data
-    }
+    @app.route('/speak')
+    def new_speech():
+        kanji_text, display_error, error_chars = example.get_user_speech()
+        return {
+            'message': data
+        }
 
-# Switch the script used for displaying text
-@app.route('/switch', methods=['POST'])
-def switch_kanji():
-    data = json.loads(request.data)
-    if data['msgData']['displayType'] == 'kanji':
-        kks = pk.kakasi()
-        result = kks.convert(data['msgData']['displayText'])
-        romaji_text = ""
-        for word in result:
-            romaji_text += word['hepburn'] + " "
-        romaji_text = romaji_text[:len(romaji_text)-1]
+    # Switch the script used for displaying text
+    @app.route('/switch', methods=['POST'])
+    def switch_kanji():
+        data = json.loads(request.data)
+        if data['msgData']['displayType'] == 'kanji':
+            kks = pk.kakasi()
+            result = kks.convert(data['msgData']['displayText'])
+            romaji_text = ""
+            for word in result:
+                romaji_text += word['hepburn'] + " "
+            romaji_text = romaji_text[:len(romaji_text)-1]
 
-    newMsgError = structure.Error(False, [])
-    newMsgData = structure.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
-    print(newMsgData.to_json())
-    return {
-        'message': newMsgData.to_json()
-    }
+        newMsgError = structure.Error(False, [])
+        newMsgData = structure.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
+        print(newMsgData.to_json())
+        return {
+            'message': newMsgData.to_json()
+        }
 
-@app.route('/undo')
-def retrieve_previous():
-    previousText = example.get_previous_text()
-    return {
-        'message': previousText
-    }
-
+    @app.route('/undo')
+    def retrieve_previous():
+        previousText = example.get_previous_text()
+        return {
+            'message': previousText
+        }
 
 if __name__ == "__main__":
     app.run()
