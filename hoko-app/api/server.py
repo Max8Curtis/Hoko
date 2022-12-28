@@ -20,7 +20,10 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 
-game = game_structs.Game()
+gameFactory = game_structs.GameFactory()
+gameFactory.new_game()
+print("Default game:")
+print(gameFactory.game.to_json())
 
 class API:
     ## Test endpoint
@@ -33,8 +36,10 @@ class API:
 
     @app.route('/start')
     def start_game():
-        game = game_structs.Game()
+        gameFactory.new_game()
+        game = gameFactory.game
         config = game.to_json()
+        print("New game:")
         print(config)
         # config = example.new_config([1,2,3,4,5,6,7,8,9])
         return {

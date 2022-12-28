@@ -41,6 +41,8 @@ import white_square from '../../assets/white_square.png'
 
 function Main() {
 
+    
+
     const [audio, setAudio] = useState({
         audioDetails: {
             url: null,
@@ -90,52 +92,54 @@ function Main() {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
    
+
+    // TODO: Change page to get targets struct from API whenever neeeded, instead of storing here
     const targets = {
-        "bank": {
-            name: 'Bank',
-            image: Bank,
-            japanese: 'ぎんこう'
-        },
-        "cinema": {
-            name: 'Cinema',
-            image: Cinema,
-            japanese: 'えいがかん'
-        },
-        "grocery": {
+        "A": {
             name: 'Grocery',
             image: Grocery,
             japanese: 'スーパー'
         },
-        "hospital": {            
-            name: 'Hospital',
-            image: Hospital,
-            japanese: 'びょういん'
-        },
-        "lake": {
-            name: 'Lake',
-            image: Lake,
-            japanese: 'みずうみ'
-        },
-        "sake shop": {
-            name: 'Sake shop',
-            image: SakeShop,
-            japanese: 'おさけや'
-        },
-        "parking": {
-            name: 'Parking',
-            image: Parking,
-            japanese: 'パーキング'
-        },
-        "fish shop": {
+        "B": {
             name: 'Fish shop',
             image: FishShop,
             japanese: 'さかなや'
         },
-        "shrine": {
+        "C": {
+            name: 'Sake shop',
+            image: SakeShop,
+            japanese: 'おさけや'
+        },
+        "D": {
+            name: 'Lake',
+            image: Lake,
+            japanese: 'みずうみ'
+        },
+        "E": {
+            name: 'Parking',
+            image: Parking,
+            japanese: 'パーキング'
+        },
+        "F": {
             name: 'Shrine',
             image: Shrine,
             japanese: 'じんじゃ'
-        }
+        },
+        "G": {
+            name: 'Cinema',
+            image: Cinema,
+            japanese: 'えいがかん'
+        },
+        "H": {
+            name: 'Bank',
+            image: Bank,
+            japanese: 'ぎんこう'
+        },        
+        "I": {            
+            name: 'Hospital',
+            image: Hospital,
+            japanese: 'びょういん'
+        },    
     }
 
     //Structs
@@ -149,14 +153,26 @@ function Main() {
         tooltip: speakingTooltip
     });
 
-    //Default target to 1 so page loads
     const [gameConfig, setgameConfig] = useState({
         config: {
             target: "",
-            map: {}
+            map: {},
+            char_dir: 0
         }
     });
-    // console.log(gameConfig.config['target']['image'])
+
+    useEffect(() => {
+        fetch('/start').then((res) =>
+                res.json().then((gameConfig) => {
+                    setgameConfig({
+                        config: gameConfig.message
+                    });
+                })
+            );
+        console.log("New config:")
+        console.log(gameConfig)
+    }, []);
+    
     const [data, setdata] = useState({
         msgData: {
             id: "",
