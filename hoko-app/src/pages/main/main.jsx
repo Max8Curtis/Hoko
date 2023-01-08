@@ -41,7 +41,7 @@ import white_square from '../../assets/white_square.png'
 
 function Main() {
 
-    
+
 
     const [audio, setAudio] = useState({
         audioDetails: {
@@ -56,19 +56,19 @@ function Main() {
         }
     });
 
-    function handleAudioStop(data){
+    function handleAudioStop(data) {
         console.log(data)
         setAudio({ audioDetails: data });
     }
-    
+
     function handleAudioUpload(file) {
         console.log(file);
     }
-    
+
     function handleCountDown(data) {
         console.log(data);
     }
-    
+
     function handleReset() {
         const reset = {
             url: null,
@@ -82,16 +82,16 @@ function Main() {
         };
         setAudio({ audioDetails: reset });
     }
-    
+
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
     let mapImageDisplayHeight = (mapImageDisplayWidth / mapImageWidth) * mapImageHeight
 
-    function Capitalize(str){
+    function Capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
-   
+
 
     // TODO: Change page to get targets struct from API whenever neeeded, instead of storing here
     const targets = {
@@ -134,12 +134,12 @@ function Main() {
             name: 'Bank',
             image: Bank,
             japanese: 'ぎんこう'
-        },        
-        "I": {            
+        },
+        "I": {
             name: 'Hospital',
             image: Hospital,
             japanese: 'びょういん'
-        },    
+        },
     }
 
     //Structs
@@ -156,23 +156,26 @@ function Main() {
     const [gameConfig, setgameConfig] = useState({
         config: {
             target: "",
-            map: {},
-            char_dir: 0
+            map: "",
+            char_row: 5,
+            char_col: 4,
+            char_dir: 0,
+            game_won: false
         }
     });
 
     useEffect(() => {
         fetch('/start').then((res) =>
-                res.json().then((gameConfig) => {
-                    setgameConfig({
-                        config: gameConfig.message
-                    });
-                })
-            );
+            res.json().then((gameConfig) => {
+                setgameConfig({
+                    config: gameConfig.message
+                });
+            })
+        );
         console.log("New config:")
         console.log(gameConfig)
     }, []);
-    
+
     const [data, setdata] = useState({
         msgData: {
             id: "",
@@ -186,10 +189,17 @@ function Main() {
         }
     });
 
-    const [isOpen, setisOpen] = useState(false);
+    const [isHelpOpen, setisHelpOpen] = useState(false);
+    const [isWinOpen, setisWinOpen] = useState(gameConfig.config['game_won']);
 
-    function togglePopup() {
-        setisOpen(!isOpen);
+
+    function toggleHelpPopup() {
+        setisHelpOpen(!isHelpOpen);
+    }
+
+    function toggleWinPopup() {
+        console.log(isWinOpen)
+        setisWinOpen(!isWinOpen)
     }
 
     //API functions
@@ -204,7 +214,7 @@ function Main() {
         );
         console.log(gameConfig)
     }
-    
+
     function fetchData() {
         fetch("/data").then((res) =>
             res.json().then((data) => {
@@ -272,13 +282,85 @@ function Main() {
 
     function undoMove() {
         fetch("/undo").then((res) =>
-        res.json().then((data) => {
-            setdata({
-                msgData: data.message
-            });
-        })
-    );
+            res.json().then((data) => {
+                setdata({
+                    msgData: data.message
+                });
+            })
+        );
+    }
 
+    function turnCharLeft() {
+        setdata({
+            msgData: {
+                id: data.msgData['id'],
+                displayText: "左に曲がります",
+                kanjiText: "左に曲がります",
+                displayType: 'romaji',
+                error: {
+                    displayError: data.msgData.error['displayError'],
+                    errorChars: data.msgData.error['errorChars']
+                }
+            }
+        });
+        
+        callMove()
+        console.log(gameConfig)
+        console.log(isWinOpen)
+    }
+
+    function moveCharForward() {
+        setdata({
+            msgData: {
+                id: data.msgData['id'],
+                displayText: "まっすぐ行って",
+                kanjiText: "まっすぐ行って",
+                displayType: 'romaji',
+                error: {
+                    displayError: data.msgData.error['displayError'],
+                    errorChars: data.msgData.error['errorChars']
+                }
+            }
+        });
+        
+        callMove()
+        console.log(gameConfig)
+        console.log(isWinOpen)
+    }
+
+
+    function turnCharRight() {
+        setdata({
+            msgData: {
+                id: data.msgData['id'],
+                displayText: "右に曲がります",
+                kanjiText: "右に曲がります",
+                displayType: 'romaji',
+                error: {
+                    displayError: data.msgData.error['displayError'],
+                    errorChars: data.msgData.error['errorChars']
+                }
+            }
+        });
+        
+        callMove()
+        console.log(gameConfig)
+        console.log(isWinOpen)
+    }
+
+    function callMove() {
+        fetch("/move", {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify(data)
+        }).then((res) =>
+            res.json().then((gameConfig) => {
+                setgameConfig({
+                    config: gameConfig.message
+                });
+            })
+        );
+        setisWinOpen(gameConfig.config['game_won'])
     }
 
     return (
@@ -293,34 +375,34 @@ function Main() {
                     <h2 style={{ fontSize: 40, fontFamily: 'MS Mincho' }}>Hōkō</h2>
                 </Grid>
                 <Grid item xs={12} style={{ marginTop: 15 }}>
-                    <Grid container direction="row" alignItems="center" columnSpacing={{md:19}}>
+                    <Grid container direction="row" alignItems="center" columnSpacing={{ md: 19 }}>
                         <Grid item xs={2.3}>
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={moveCharForward} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={turnCharRight} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={speak.func} />
+                                        <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} />
                                         <h2 className='button-label'>
-                                            {speak.speaking ? 'Stop'  : 'Speak'}
+                                            {speak.speaking ? 'Stop' : 'Speak'}
                                         </h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={togglePopup} />
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={toggleHelpPopup} />
                                         <h2 className='button-label'>Help</h2>
-                                        {isOpen && <Popup
+                                        {isHelpOpen && <Popup
                                             content={
                                                 <>
                                                     <Box sx={{ height: '100%' }}>
@@ -335,62 +417,74 @@ function Main() {
                                                             <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
                                                             <p>If part of your speech is unrecognizable, the relevant part will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is recognizable!</p>
                                                             <h3>Targets</h3>
-                                                            <div>                                                           
+                                                            <div>
                                                                 <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
                                                                     <Grid item>
                                                                         <Grid container direction="row" justifyContent="space-between" alignItems="center">
-                                                                            <PopupImage targets={targets} targetNumber={1} />
-                                                                            <PopupImage targets={targets} targetNumber={2} />
-                                                                            <PopupImage targets={targets} targetNumber={3} />
-                                                                            <PopupImage targets={targets} targetNumber={4} />                                                                   
-                                                                        </Grid>                                                                  
+                                                                            <PopupImage targets={targets} target={"A"} />
+                                                                            <PopupImage targets={targets} target={"B"} />
+                                                                            <PopupImage targets={targets} target={"C"} />
+                                                                            <PopupImage targets={targets} target={"D"} />
+                                                                        </Grid>
                                                                     </Grid>
                                                                     <Grid item>
                                                                         <Grid container direction="row" justifyContent="flex-start" alignItems="center">
-                                                                            <PopupImage targets={targets} targetNumber={5} /> 
-                                                                            <PopupImage targets={targets} targetNumber={6} /> 
-                                                                            <PopupImage targets={targets} targetNumber={7} /> 
-                                                                            <PopupImage targets={targets} targetNumber={8} /> 
-                                                                            <PopupImage targets={targets} targetNumber={9} /> 
+                                                                            <PopupImage targets={targets} target={"E"} />
+                                                                            <PopupImage targets={targets} target={"F"} />
+                                                                            <PopupImage targets={targets} target={"G"} />
+                                                                            <PopupImage targets={targets} target={"H"} />
+                                                                            <PopupImage targets={targets} target={"I"} />
                                                                         </Grid>
                                                                     </Grid>
-                                                                </Grid>                                                                                                      
+                                                                </Grid>
                                                             </div>
-                                                        </Grid> 
+                                                        </Grid>
                                                     </Box>
                                                 </>
                                             }
-                                            handleClose={togglePopup}
-                                            />
+                                            handleClose={toggleHelpPopup}
+                                        />
                                         }
-                                    </Grid>                                
+                                        {isWinOpen && <Popup
+                                            content={
+                                                <>
+                                                    <div style={{textAlign: 'center'}}>
+                                                        <h1>Congratulations!</h1>
+                                                        <h3>You have successfully navigated to the correct target!</h3>
+                                                    </div>
+                                                </>
+                                            }
+                                            handleClose={toggleWinPopup}
+                                        />
+                                        }
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={7.4}>
-                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charX={1} charY={1} rotation={0} style={{paddingLeft:50}}/>
+                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charRow={gameConfig.config['char_row']} charCol={gameConfig.config['char_col']} charDir={gameConfig.config['char_dir']} style={{ paddingLeft: 50 }} />
                         </Grid>
                         <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
                                 <Grid item>
-                                    <Grid container direction="column" justifyContent="space-evenly" alignItems="center" style={{marginBottom: 60}}>
+                                    <Grid container direction="column" justifyContent="space-evenly" alignItems="center" style={{ marginBottom: 60 }}>
                                         <Grid item>
                                             <h2 className='button-label'>Target:</h2>
                                         </Grid>
                                         <Grid item>
-                                            <div style={{height: 80, width: 80, borderRadius: 4, border: '1px solid black'}}>
+                                            <div style={{ height: 80, width: 80, borderRadius: 4, border: '1px solid black' }}>
                                                 {gameConfig.config['target'] != "" &&
-                                                    <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4}/>
+                                                    <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4} />
                                                 }
                                                 {gameConfig.config['target'] == "" &&
-                                                    <Target chosenTarget={white_square} borderRadius={4}/>
+                                                    <Target chosenTarget={white_square} borderRadius={4} />
                                                 }
-                                                                                                
+
                                             </div>
                                         </Grid>
                                         <Grid item>
-                                            <div style={{width:150, maxWidth:150, textAlign:'center'}}>
-                                                
+                                            <div style={{ width: 150, maxWidth: 150, textAlign: 'center' }}>
+
                                                 {gameConfig.config['target'] != "" &&
                                                     <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
                                                 }
@@ -398,26 +492,26 @@ function Main() {
                                                     <h2 className='button-label'>-</h2>
                                                 }
                                             </div>
-                                        </Grid>                   
+                                        </Grid>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame}/>
+                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame} />
                                         <h2 className='button-label'>Start</h2>
                                     </Grid>
-                                </Grid>                               
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} style={{ marginTop: 20}}>
+                <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.msgData['displayText']} width={600} rows={4}/>
+                        <Dialog text={data.msgData['displayText']} width={600} rows={4} />
                         <Grid container direction="row" justifyContent="space-between">
                             <div>
                                 {data.msgData['error']['displayError'] &&
-                                    <p style={{color: "red"}}>{errorMsg}</p>                                    
+                                    <p style={{ color: "red" }}>{errorMsg}</p>
                                 }
                             </div>
                             <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={22} buttonText={Capitalize(data.msgData['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />

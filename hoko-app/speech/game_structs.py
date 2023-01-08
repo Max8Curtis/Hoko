@@ -6,7 +6,6 @@ from pathlib import Path
 
 cwd = os.getcwd()
 cur_file = str(Path(Path(__file__).parent))
-print("Current directory is: " + cur_file)
 os.chdir(cur_file)
 MAPS = "./game_maps.json"
 with open(MAPS, 'r') as j:
@@ -18,12 +17,11 @@ class Map:
     def __init__(self):
         self.maps = copy.deepcopy(maps)
         self.chosen_map = self.choose_map()
-        # print(self.chosen_map)
+        self.max_row = len(self.maps['objects']['maps'][str(self.chosen_map)]['layout'])-1
+        self.max_col = len(self.maps['objects']['maps'][str(self.chosen_map)]['layout'][0])-1
         self.chosen_target = self.choose_target()
-        # print(self.chosen_target)
         chosen_target_row, chosen_target_col = self.get_row_col(str(self.chosen_target))
         self.update_map(chosen_target_row, chosen_target_col, "T")
-        # print(self.maps)
 
     def choose_map(self):
         return random.choice(list(self.maps['objects']['maps']))
@@ -31,6 +29,7 @@ class Map:
     def choose_target(self):
         return random.choice(list(self.maps['objects']['maps'][str(self.chosen_map)]['targets']))
 
+    # Returns the row and column of the first occurence of a node
     def get_row_col(self, to_find):
         for row in range(len(self.maps['objects']['maps'][str(self.chosen_map)]['layout'])):
             for col in range(len(self.maps['objects']['maps'][str(self.chosen_map)]['layout'][row])):
@@ -40,6 +39,13 @@ class Map:
     def update_map(self, row, col, new_node):
         self.maps['objects']['maps'][str(self.chosen_map)]['layout'][row][col] = new_node
 
+    # Reverts a location to the original node
+    def revert_location_to_node(self, row, col):
+        self.maps['objects']['maps'][str(self.chosen_map)]['layout'][row][col] = maps['objects']['maps'][str(self.chosen_map)]['layout'][row][col]
+
+    def get_node_at(self, row, col):
+        return self.maps['objects']['maps'][str(self.chosen_map)]['layout'][row][col]
+
     # Returns index of chosen map and map data as tuple
     def get_map(self):
         return self.maps['objects']['maps'][str(self.chosen_map)]
@@ -48,109 +54,59 @@ class Map:
     def get_target(self):
         return self.chosen_target
 
-# map1 = Map()
-# map2 = Map()
+    def get_max_row(self):
+        return self.max_row
 
-# test_dict = {"a":1, "b":2}
-# dict_copy = test_dict.copy()
+    def get_max_col(self):
+        return self.max_col
 
-# dict_copy['a'] = 3
-# print(dict_copy)
-# print(test_dict)
-# class Map:
-#     def __init__(self):
-#         self.maps_copy = maps.copy() #Create copy of maps dict so dict changes only in effect inside object
-#         print("Maps copy: ")
-#         print(self.maps_copy)
-#         self.chosen_map_index, self.map, self.objects = self.random_map()
-#         print("Chosen map index: "+str(self.chosen_map_index))
-#         self.target = self.choose_target()
-#         print("Chosen target: "+str(self.target))
-#         self.place_target()
- 
-
-#     # Returns randomly selected map index, map data and map objects as tuple
-#     def random_map(self):
-#         map_nums = [x for x in self.maps_copy['objects']['maps']]
-#         chosen_map_index = random.randint(0, len(map_nums)-1)
-#         chosen_map = map_nums[chosen_map_index]
-        
-#         return chosen_map_index+1, self.maps_copy['objects']['maps'][str(chosen_map)], self.maps_copy['objects']
-
-#     # Returns a randomly selected target
-#     def choose_target(self):
-#         chosen_target = self.map['targets'][random.randint(0, len(self.map['targets'])-1)]
-#         return chosen_target
-
-#     # Places target on map
-#     def place_target(self):
-#         for row in range(0, len(self.map['layout'])-1):
-#             for column in range(0, len(self.map['layout'][row])-1):
-#                 if self.map['layout'][row][column] == self.target:
-#                     self.update_node(column, row, "T")
-
-#     # Returns index of chosen map and map data as tuple
-#     def get_map(self):
-#         return self.chosen_map_index, self.map
-
-#     # Returns target letter and target name as tuple
-#     def get_target(self):
-#         target_name = self.objects['nodes'].get(self.target)
-#         return self.target, target_name
-
-#     # Change the value of a node
-#     def update_node(self, x, y, new_label):
-#         self.map['layout'][y][x] = new_label
-
-#     # Returns a list of target names from target letters
-#     def transcribe_targets(self):
-#         target_names = []
-#         for t in range(len(self.maps_copy['objects']['maps'][str(self.chosen_map_index)]['targets'])):
-#             # print(t)
-#             target = self.maps_copy['objects']['maps'][str(self.chosen_map_index)]['targets'][t]
-#             target_names.append(self.maps_copy['objects']['nodes'].get(target))
-
-#         return target_names
+    def get_chosen_map_index(self):
+        return self.chosen_map
 
 
 class Character:
-    def __init__(self, start_x, start_y, start_dir):
-        self.x = start_x 
-        self.y = start_y
+    def __init__(self, start_row, start_col, start_dir):
+        self.row = start_row 
+        self.col = start_col
         self.dir = start_dir
 
-    def move(self, move_x, move_y):
-        self.x += move_x
-        self.y += move_y
+    def set_location(self, row, col):
+        self.row = row
+        self.col = col
+        # print(self.row)
 
     def rotate(self, rot):
-        self.dir += rot % 360
+        self.dir += rot
+        self.dir = self.dir % 360
 
-    def get_x(self):
-        return self.x
+    def get_row(self):
+        return self.row
 
-    def get_y(self):
-        return self.y
+    def get_col(self):
+        return self.col
 
     def get_direction(self):
         return self.dir
 
+
 class Game:
-    def __init__(self):        
+    def __init__(self):
+        self.game_won = False
         self.prev_text = ""
         self.cur_text = ""
         self.map = Map()
-        # print(self.map.get_map())
-        char_start_y, char_start_x = self.place_character()
-        self.char = Character(char_start_y, char_start_x, 0)
+        char_start_row, char_start_col = self.place_character()
+        self.char = Character(char_start_row, char_start_col, 0)
 
     def place_character(self):
         map_data = self.map.get_map()['layout']
-        for i in range(len(map_data)):
-            for j in range(len(map_data[i])):
-                if map_data[i][j] == "S":
-                    self.map.update_map(i, j, "c")
-        return i, j
+        for row in range(len(map_data)):
+            for col in range(len(map_data[row])):
+                if map_data[row][col] == "S":
+                    self.map.update_map(row, col, "c")
+                    break
+
+        return row, col
 
     def update_text(self, text):
         self.prev_text = self.cur_text
@@ -161,7 +117,7 @@ class Game:
 
     # Reset game data to default values - keeps map the same but character is sent back to start
     def reset_game(self):
-        self.char = Character(char_start_y, char_start_x, 0)
+        self.char = Character(char_start_row, char_start_col, 0)
         self.prev_text = ""
         self.cur_text = ""
 
@@ -173,10 +129,74 @@ class Game:
         map = self.map.get_map()
         return {
             'target': self.map.get_target(),
-            'map': map,
-            'char_dir': self.char.get_direction()
+            'map': self.map.get_chosen_map_index(),
+            'char_row': self.char.get_row(),
+            'char_col': self.char.get_col(),
+            'char_dir': self.char.get_direction(),
+            'game_won': self.game_won
         }
 
+    def valid_move(self, node_at_new_loc):
+        valid_move = False
+        if node_at_new_loc == "_" or node_at_new_loc == "i" or node_at_new_loc == "T" or node_at_new_loc == "S":
+            valid_move = True
+        
+        return valid_move
+
+    # Performs move if valid
+    def make_move(self, move):
+        valid_move = False
+        game_winning_move = False
+        curr_char_row = self.char.get_row()
+        curr_char_col = self.char.get_col()
+        curr_char_dir = self.char.get_direction()
+        new_row = curr_char_row
+        new_col = curr_char_col
+
+        if move == "turn_left":
+            self.char.rotate(-90)
+            valid_move = True
+        elif move == "turn_right":
+            self.char.rotate(90)
+            valid_move = True
+        elif move == "reverse":
+            self.char.rotate(180)
+            valid_move = True
+        elif move == "forward":
+            if curr_char_dir == 0 and curr_char_row >= 1:
+                new_row = curr_char_row-1
+                new_col = curr_char_col              
+            elif curr_char_dir == 90 and curr_char_col <= self.map.get_max_col():
+                new_row = curr_char_row
+                new_col = curr_char_col+1
+            elif curr_char_dir == 180 and curr_char_row <= self.map.get_max_row():
+                new_row = curr_char_row+1
+                new_col = curr_char_col
+            elif curr_char_dir == 270 and curr_char_col >= 1:
+                new_row = curr_char_row
+                new_col = curr_char_col-1
+            
+            # print(new_row)
+            # print(new_col)
+
+            # Check that move is within map boundary            
+            if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
+                node_at_new_loc = self.map.get_node_at(new_row, new_col)
+                print(node_at_new_loc)
+                valid_move = self.valid_move(node_at_new_loc)
+
+            if valid_move:
+                self.char.set_location(new_row, new_col)
+
+                # Return current square to original node when character is moved
+                self.map.revert_location_to_node(curr_char_row, curr_char_col)
+                if node_at_new_loc == "T":
+                    game_winning_move = True
+                    self.game_won = True
+            # print(f"Row: {self.char.get_row()}")
+        return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
+
+        # return not_valid_move, game_winning_move
 
 class GameFactory:
     def __init__(self):
@@ -186,12 +206,12 @@ class GameFactory:
         self.game = Game()
         self.game_exists = True
 
-gameFac = GameFactory()
-gameFac.new_game()
-game1 = gameFac.game
+# gameFac = GameFactory()
+# gameFac.new_game()
+# game1 = gameFac.game
 
-gameFac.new_game()
-game2 = gameFac.game
-print(game1.to_json())
+# gameFac.new_game()
+# game2 = gameFac.game
+# print(game1.to_json())
 
-print(game2.to_json())
+# print(game2.to_json())
