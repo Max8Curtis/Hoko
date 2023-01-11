@@ -52,15 +52,15 @@ class API:
     def move_char():
         data = json.loads(request.data)
         text = data['msgData']['kanjiText']
-        print(text)
+        # print(text)
         move = convert_text.convert(text)
-        print(move)
-        new_row, new_col, new_dir, valid_move, game_winning_move = gameFactory.game.make_move(move)
-        print(f"Validity of this move is {valid_move}")
-        print(f"New character position:")
-        print(f"Row: {new_row}, Col: {new_col}, Direction: {new_dir}")
+        # print(move)
+        new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
+        # print(f"Validity of this move is {valid_move}")
+        # print(f"New character position:")
+        # print(f"Row: {new_row}, Col: {new_col}, Direction: {new_dir}")
         config = gameFactory.game.to_json()
-        print(config)
+        # print(config)
         return {
             'message': config
         }

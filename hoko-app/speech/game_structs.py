@@ -146,7 +146,7 @@ class Game:
     # Performs move if valid
     def make_move(self, move):
         valid_move = False
-        game_winning_move = False
+        # game_winning_move = False
         curr_char_row = self.char.get_row()
         curr_char_col = self.char.get_col()
         curr_char_dir = self.char.get_direction()
@@ -191,7 +191,7 @@ class Game:
                 # Return current square to original node when character is moved
                 self.map.revert_location_to_node(curr_char_row, curr_char_col)
                 if node_at_new_loc == "T":
-                    game_winning_move = True
+                    # game_winning_move = True
                     self.game_won = True
             # print(f"Row: {self.char.get_row()}")
         return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
