@@ -72,6 +72,29 @@ class API:
             'message': game.to_json()
         }
 
+    @app.route('/audio', methods=['POST'])
+    def get_audio():
+        # data = json.loads(request.data)
+        # print(data)
+        # print(request.headers)
+        # s = request.get_data(parse_form_data=True)
+        # print(request.get_data(parse_form_data=True))
+        # print(s.decode('utf-16'))
+        # print(s[0:10])
+        # print(request.files['file'])
+
+        # print(request.form)
+        # print(request.form.get('file'))
+        content = request.files['file']
+        # print(content)
+        print(content.read().decode('utf-16-be'))
+        # with open("audio.txt", "wb") as file: 
+        #     file.write(content.read())
+        # file = request.form.get('file')
+        return {
+            'message': 'hi there'
+        }
+
     @app.route('/speak')
     def new_speech():
         kanji_text, display_error, error_chars = example.get_user_speech()

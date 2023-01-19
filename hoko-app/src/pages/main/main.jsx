@@ -39,49 +39,47 @@ import Shrine from '../../assets/map/shrine.png'
 
 import white_square from '../../assets/white_square.png'
 
-function Main() {
+function Main({start, stop, recording, audioURL}) {
 
+    // const [audio, setAudio] = useState({
+    //     audioDetails: {
+    //         url: null,
+    //         blob: null,
+    //         chunks: null,
+    //         duration: {
+    //             h: 0,
+    //             m: 0,
+    //             s: 0
+    //         }
+    //     }
+    // });
 
+    // function handleAudioStop(data) {
+    //     console.log(data)
+    //     setAudio({ audioDetails: data });
+    // }
 
-    const [audio, setAudio] = useState({
-        audioDetails: {
-            url: null,
-            blob: null,
-            chunks: null,
-            duration: {
-                h: 0,
-                m: 0,
-                s: 0
-            }
-        }
-    });
+    // function handleAudioUpload(file) {
+    //     console.log(file);
+    // }
 
-    function handleAudioStop(data) {
-        console.log(data)
-        setAudio({ audioDetails: data });
-    }
+    // function handleCountDown(data) {
+    //     console.log(data);
+    // }
 
-    function handleAudioUpload(file) {
-        console.log(file);
-    }
-
-    function handleCountDown(data) {
-        console.log(data);
-    }
-
-    function handleReset() {
-        const reset = {
-            url: null,
-            blob: null,
-            chunks: null,
-            duration: {
-                h: 0,
-                m: 0,
-                s: 0
-            }
-        };
-        setAudio({ audioDetails: reset });
-    }
+    // function handleReset() {
+    //     const reset = {
+    //         url: null,
+    //         blob: null,
+    //         chunks: null,
+    //         duration: {
+    //             h: 0,
+    //             m: 0,
+    //             s: 0
+    //         }
+    //     };
+    //     setAudio({ audioDetails: reset });
+    // }
 
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
@@ -91,7 +89,6 @@ function Main() {
     function Capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
-
 
     // TODO: Change page to get targets struct from API whenever neeeded, instead of storing here
     const targets = {
@@ -146,12 +143,12 @@ function Main() {
     const errorMsg = 'Your voice was unrecognizable, please repeat.';
     const speakingTooltip = 'Speak to move character';
     const stopTooltip = 'Stop recording speech';
-    const [speak, setspeak] = useState({
-        speaking: false,
-        image: micImage,
-        func: getSpeech,
-        tooltip: speakingTooltip
-    });
+    // const [speak, setspeak] = useState({
+    //     speaking: false,
+    //     image: micImage,
+    //     func: getSpeech,
+    //     tooltip: speakingTooltip
+    // });
 
     const [gameConfig, setgameConfig] = useState({
         config: {
@@ -254,31 +251,31 @@ function Main() {
         }
     };
 
-    function stopSpeaking() {
-        //pass
-        setspeak({
-            speaking: false,
-            image: micImage,
-            func: getSpeech,
-            tooltip: speakingTooltip
-        })
-    }
+    // function stopSpeaking() {
+    //     //pass
+    //     setspeak({
+    //         speaking: false,
+    //         image: micImage,
+    //         func: getSpeech,
+    //         tooltip: speakingTooltip
+    //     })
+    // }
 
-    function getSpeech() {
-        fetch("/speak").then((res) =>
-            res.json().then((data) => {
-                setdata({
-                    msgData: data.message
-                });
-            })
-        );
-        setspeak({
-            speaking: true,
-            image: stopImage,
-            func: stopSpeaking,
-            tooltip: stopTooltip
-        })
-    }
+    // function getSpeech() {
+    //     fetch("/speak").then((res) =>
+    //         res.json().then((data) => {
+    //             setdata({
+    //                 msgData: data.message
+    //             });
+    //         })
+    //     );
+    //     setspeak({
+    //         speaking: true,
+    //         image: stopImage,
+    //         func: stopSpeaking,
+    //         tooltip: stopTooltip
+    //     })
+    // }
 
     function undoMove() {
         fetch("/undo").then((res) =>
@@ -392,11 +389,20 @@ function Main() {
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} />
+                                        {recording &&
+                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={stop} />
+                                        }
+                                        {!recording &&
+                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={start} />
+                                        }
+                                        {/* <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} /> */}
                                         <h2 className='button-label'>
-                                            {speak.speaking ? 'Stop' : 'Speak'}
+                                            {recording ? 'Stop' : 'Speak'}
                                         </h2>
                                     </Grid>
+                                </Grid>
+                                <Grid item>
+                                    <audio src={audioURL} controls="controls" hidden/>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
