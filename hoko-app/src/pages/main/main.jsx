@@ -38,8 +38,12 @@ import FishShop from '../../assets/map/fish_shop.png'
 import Shrine from '../../assets/map/shrine.png'
 
 import white_square from '../../assets/white_square.png'
+import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-function Main({start, stop, recording, audioURL}) {
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText}) {
+
+
+    // TODO: Move all movement functions to App.js so they can be called once move is returned from /audio
 
     // const [audio, setAudio] = useState({
     //     audioDetails: {
@@ -151,14 +155,15 @@ function Main({start, stop, recording, audioURL}) {
     // });
 
     const [gameConfig, setgameConfig] = useState({
-        config: {
-            target: "",
-            map: "",
-            char_row: 5,
-            char_col: 4,
-            char_dir: 0,
-            game_won: false
-        }
+        config: config
+        // config: {
+        //     target: "",
+        //     map: "",
+        //     char_row: 5,
+        //     char_col: 4,
+        //     char_dir: 0,
+        //     game_won: false
+        // }
     });
 
     useEffect(() => {
@@ -222,34 +227,7 @@ function Main({start, stop, recording, audioURL}) {
         );
     };
 
-    function swapData() {
-        if (data.msgData['displayType'] == 'romaji') {
-            setdata({
-                msgData: {
-                    id: data.msgData['id'],
-                    displayText: data.msgData['kanjiText'],
-                    kanjiText: data.msgData['kanjiText'],
-                    displayType: 'kanji',
-                    error: {
-                        displayError: data.msgData.error['displayError'],
-                        errorChars: data.msgData.error['errorChars']
-                    }
-                }
-            });
-        } else {
-            fetch("/switch", {
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify(data)
-            }).then((res) =>
-                res.json().then((data) => {
-                    setdata({
-                        msgData: data.message
-                    });
-                })
-            );
-        }
-    };
+    
 
     // function stopSpeaking() {
     //     //pass
@@ -301,9 +279,9 @@ function Main({start, stop, recording, audioURL}) {
             }
         });
         
-        callMove()
-        console.log(gameConfig)
-        console.log(isWinOpen)
+        // callMove()
+        // console.log(gameConfig)
+        // console.log(isWinOpen)
     }
 
     function moveCharForward() {
@@ -320,45 +298,47 @@ function Main({start, stop, recording, audioURL}) {
             }
         });
         
-        callMove()
-        console.log(gameConfig)
-        console.log(isWinOpen)
+        // callMove()
+        // console.log(gameConfig)
+        // console.log(isWinOpen)
     }
 
 
-    function turnCharRight() {
-        setdata({
-            msgData: {
-                id: data.msgData['id'],
-                displayText: "右に曲がります",
-                kanjiText: "右に曲がります",
-                displayType: 'romaji',
-                error: {
-                    displayError: data.msgData.error['displayError'],
-                    errorChars: data.msgData.error['errorChars']
-                }
-            }
-        });
+    // function turnCharRight() {
+    //     console.log(config)
+    //     // console.log(gameConfig)
+    //     setdata({
+    //         msgData: {
+    //             id: data.msgData['id'],
+    //             displayText: "右に曲がります",
+    //             kanjiText: "右に曲がります",
+    //             displayType: 'romaji',
+    //             error: {
+    //                 displayError: data.msgData.error['displayError'],
+    //                 errorChars: data.msgData.error['errorChars']
+    //             }
+    //         }
+    //     });
         
-        callMove()
-        console.log(gameConfig)
-        console.log(isWinOpen)
-    }
+    //     callMove()
+        // console.log(gameConfig)
+        // console.log(isWinOpen)
+    // }
 
-    function callMove() {
-        fetch("/move", {
-            method: 'POST',
-            mode: 'cors',
-            body: JSON.stringify(data)
-        }).then((res) =>
-            res.json().then((gameConfig) => {
-                setgameConfig({
-                    config: gameConfig.message
-                });
-            })
-        );
-        setisWinOpen(gameConfig.config['game_won'])
-    }
+    // function callMove() {
+    //     fetch("/move", {
+    //         method: 'POST',
+    //         mode: 'cors',
+    //         body: JSON.stringify(data)
+    //     }).then((res) =>
+    //         res.json().then((gameConfig) => {
+    //             setgameConfig({
+    //                 config: gameConfig.message
+    //             });
+    //         })
+    //     );
+    //     setisWinOpen(gameConfig.config['game_won'])
+    // }
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -377,13 +357,13 @@ function Main({start, stop, recording, audioURL}) {
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={moveCharForward} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={turnCharLeft} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={turnCharRight} />
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undo} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
@@ -406,7 +386,7 @@ function Main({start, stop, recording, audioURL}) {
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={toggleHelpPopup} />
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={moveCharForward} /> {/*toggleHelpPopup} /> */} 
                                         <h2 className='button-label'>Help</h2>
                                         {isHelpOpen && <Popup
                                             content={
@@ -468,7 +448,7 @@ function Main({start, stop, recording, audioURL}) {
                             </Grid>
                         </Grid>
                         <Grid item xs={7.4}>
-                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charRow={gameConfig.config['char_row']} charCol={gameConfig.config['char_col']} charDir={gameConfig.config['char_dir']} style={{ paddingLeft: 50 }} />
+                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charRow={config['char_row']} charCol={config['char_col']} charDir={config['char_dir']} style={{ paddingLeft: 50 }} />
                         </Grid>
                         <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
@@ -520,7 +500,7 @@ function Main({start, stop, recording, audioURL}) {
                                     <p style={{ color: "red" }}>{errorMsg}</p>
                                 }
                             </div>
-                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={22} buttonText={Capitalize(data.msgData['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={22} buttonText={Capitalize(data.msgData['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
                         </Grid>
                     </Grid>
                 </Grid>

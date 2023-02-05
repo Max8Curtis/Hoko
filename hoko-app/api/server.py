@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api, reqparse
 import pykakasi as pk
 import json
+import spacy
+import os
 
 # Allow python scripts from other directories to be executed
 import sys
@@ -11,9 +13,12 @@ print(path)
 sys.path.insert(0, path)
 
 from speech import example
-from speech import structure
 from speech import game_structs
 from speech import convert_text
+from speech import recorder
+
+nlp = spacy.load(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'model'))
+print(convert_text.predict(nlp, '100メートル行ってください'))
 
 app = Flask("AppAPI")
 api = Api(app)
@@ -67,9 +72,10 @@ class API:
 
     @app.route('/reset')
     def reset_game():
-        game.reset_game()
+        gameFactory.game.reset_game()
+        config = gameFactory.game.to_json()
         return {
-            'message': game.to_json()
+            'message': config
         }
 
     @app.route('/audio', methods=['POST'])
@@ -85,14 +91,22 @@ class API:
 
         # print(request.form)
         # print(request.form.get('file'))
-        content = request.files['file']
+        # content = request.files['file']
         # print(content)
-        print(content.read().decode('utf-16-be'))
+        # print(content.read().decode('utf-16-be'))
         # with open("audio.txt", "wb") as file: 
         #     file.write(content.read())
         # file = request.form.get('file')
+        text = recorder.recognize_speech(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'myspeech.wav'), 6)
+        # print(text)
+        text = '100メートル行ってください'
+        move = convert_text.predict(nlp, text)
+        # print(move)
+        new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
+        config = gameFactory.game.to_json()
+        print(config)
         return {
-            'message': 'hi there'
+            'message': config
         }
 
     @app.route('/speak')
@@ -106,26 +120,32 @@ class API:
     @app.route('/switch', methods=['POST'])
     def switch_kanji():
         data = json.loads(request.data)
-        if data['msgData']['displayType'] == 'kanji':
+        print(data)
+        if data['data']['displayType'] == 'kanji':
             kks = pk.kakasi()
-            result = kks.convert(data['msgData']['displayText'])
+            result = kks.convert(data['data']['displayText'])
             romaji_text = ""
             for word in result:
                 romaji_text += word['hepburn'] + " "
             romaji_text = romaji_text[:len(romaji_text)-1]
 
-        newMsgError = structure.Error(False, [])
-        newMsgData = structure.Data(data['msgData']['id'], romaji_text, data['msgData']['kanjiText'], 'romaji', newMsgError)
-        print(newMsgData.to_json())
+        
+        gameFactory.game.data.update(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error':False, 'error_chars':[]})
+        config = gameFactory.game.to_json()
+        # print(newMsgData.to_json())
         return {
-            'message': newMsgData.to_json()
+            'message': config
         }
 
     @app.route('/undo')
     def retrieve_previous():
-        previousText = example.get_previous_text()
+        previousText = gameFactory.game.get_previous_text()
+        gameFactory.game.load_previous_config()
+        config = gameFactory.game.to_json()
         return {
-            'message': previousText
+            'message': {'previous_text': previousText,
+                        'previous_config': config
+                    }
         }
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import os
 import copy
 from pathlib import Path
 
+#################
 cwd = os.getcwd()
 cur_file = str(Path(Path(__file__).parent))
 os.chdir(cur_file)
@@ -11,7 +12,43 @@ MAPS = "./game_maps.json"
 with open(MAPS, 'r') as j:
     maps = json.loads(j.read())
 os.chdir(cwd)
+#################
 
+class Data:
+    def __init__(self, display_text, kanji_text, display_type):
+        self.display_text = display_text
+        self.kanji_text = kanji_text
+        self.display_type = display_type
+        self.error = Error()
+
+    def update(self, display_text, kanji_text, display_type, error):
+        self.display_text = display_text
+        self.kanji_text = kanji_text
+        self.display_type = display_type
+        self.error.update(error['display_error'], error['error_chars'])
+
+    def to_json(self):
+        return {
+            'displayText': self.display_text,
+            'kanjiText': self.kanji_text,
+            'displayType': self.display_type,
+            'error': self.error.to_json()
+        }
+
+class Error:
+    def __init__(self):
+        self.display_error = False
+        self.error_chars = []
+
+    def update(self, display_error, error_chars):
+        self.display_error = display_error
+        self.error_chars = error_chars
+
+    def to_json(self):
+        return {
+            'displayError': self.display_error,
+            'errorChars': self.error_chars
+        }
 
 class Map:
     def __init__(self):
@@ -92,11 +129,13 @@ class Character:
 class Game:
     def __init__(self):
         self.game_won = False
-        self.prev_text = ""
-        self.cur_text = ""
+        # self.prev_text = ""
+        # self.cur_text = ""
         self.map = Map()
         char_start_row, char_start_col = self.place_character()
         self.char = Character(char_start_row, char_start_col, 0)
+        # self.error = Error()
+        self.data = Data("", "", 'kanji')
 
     def place_character(self):
         map_data = self.map.get_map()['layout']
@@ -108,9 +147,11 @@ class Game:
 
         return row, col
 
-    def update_text(self, text):
-        self.prev_text = self.cur_text
-        self.cur_text = text
+    def update_data(self, id, display_text, kanji_text, display_type, error):
+        self.data.update(id, display_text, kanji_text, display_type, error)
+
+    def update_error(self, display_error, error_chars):
+        self.error.update(display_error, error_chars)
 
     def load_prev_text(self):
         return self.prev_text
@@ -118,23 +159,13 @@ class Game:
     # Reset game data to default values - keeps map the same but character is sent back to start
     def reset_game(self):
         self.char = Character(char_start_row, char_start_col, 0)
-        self.prev_text = ""
-        self.cur_text = ""
+        self.data = Data("", "", 'kanji')
 
     def get_character(self):
         return self.char
 
-    # Returns game data as json
-    def to_json(self):
-        map = self.map.get_map()
-        return {
-            'target': self.map.get_target(),
-            'map': self.map.get_chosen_map_index(),
-            'char_row': self.char.get_row(),
-            'char_col': self.char.get_col(),
-            'char_dir': self.char.get_direction(),
-            'game_won': self.game_won
-        }
+    def get_game_won(self):
+        return self.game_won
 
     def valid_move(self, node_at_new_loc):
         valid_move = False
@@ -197,6 +228,19 @@ class Game:
         return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
         # return not_valid_move, game_winning_move
+
+        # Returns game data as json
+    def to_json(self):
+        map = self.map.get_map()
+        return {
+            'target': self.map.get_target(),
+            'map': self.map.get_chosen_map_index(),
+            'char_row': self.char.get_row(),
+            'char_col': self.char.get_col(),
+            'char_dir': self.char.get_direction(),
+            'game_won': self.get_game_won(),
+            'data': self.data.to_json()
+        }
 
 class GameFactory:
     def __init__(self):
