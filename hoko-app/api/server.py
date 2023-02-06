@@ -73,7 +73,7 @@ class API:
     @app.route('/reset')
     def reset_game():
 
-        gameFactory.game.reset_game()
+        gameFactory.reset_game()
         config = gameFactory.game.to_json()
         return {
             'message': config

@@ -7,7 +7,7 @@ function Button({bid, buttonImage, buttonWidth, buttonHeight, buttonText, imageW
     return (
         <div>
             <Tooltip title={tooltipText} placement="right" arrow>
-                <button style={{width: buttonWidth, height: buttonHeight, borderRadius: 8, disabled: disabled}} onClick={handleClick}>
+                <button style={{width: buttonWidth, height: buttonHeight, borderRadius: 8}} onClick={handleClick} disabled={disabled}>
                     <div className="flex-container">
                         {buttonText?.length &&
                             <div style={{width: 30, marginRight:18}}>

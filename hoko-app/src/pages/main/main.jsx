@@ -336,7 +336,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={reset} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={reset} disabled={config['at_game_start']} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>

@@ -170,6 +170,7 @@ class App extends React.Component {
     fetch("/undo").then(async (res) => {
       const data = await res.json();
       this.assignState(data)
+      console.log(data)
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);

@@ -168,6 +168,7 @@ class Game:
     def reset_game(self):
         self.char = Character(self.char_start_row, self.char_start_col, 0)
         self.data = Data("", "", 'kanji')
+        self.at_game_start = True
 
     def get_character(self):
         return self.char
@@ -274,24 +275,35 @@ class GameFactory:
         self.game_states = []
         self.game_exists = True
         self.game_state_count = 0
+        self.game.update_game_start(True)
+        print(self.game_states)
 
     # Saves the current game state so that it can be reverted to
     def save_game_state(self):
         self.game_states.append(self.game.to_json())
         print("SAVING GAME STATE")
+        print(self.game_states)
         self.game_state_count += 1
         if self.game_state_count > 1:
             self.game.update_game_start(False)
 
     # Loads the previous game state into the Game object to 'undo' a move, then removes state from the list
     def load_previous_config(self):
-        print("GAME STATES:")
-        print(self.game_states)
+        
         self.game.load_config(self.game_states[self.game_state_count-2])
+        # print(f"New state: {self.game_states[self.game_state_count-2]}")
         last_state = self.game_states.pop()
+        # print("GAME STATES:")
+        print(self.game_states)
         self.game_state_count -= 1
-        if self.game_state_count == 0:
+        if self.game_state_count == 1:
             self.game.update_game_start(True)
+
+    def reset_game(self):
+        self.game.reset_game()
+        self.game_state_count = 1
+        self.game_states = [self.game_states[0]]
+        print(self.game_states)
 
 # gameFac = GameFactory()
 # gameFac.new_game()
