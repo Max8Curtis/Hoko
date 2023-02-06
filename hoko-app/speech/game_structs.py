@@ -22,10 +22,12 @@ class Data:
         self.error = Error()
 
     def update(self, display_text, kanji_text, display_type, error):
+        display_error = list(error.values())[0]
+        error_chars = list(error.values())[1]
         self.display_text = display_text
         self.kanji_text = kanji_text
         self.display_type = display_type
-        self.error.update(error['display_error'], error['error_chars'])
+        self.error.update(display_error, error_chars)
 
     def to_json(self):
         return {
@@ -112,6 +114,9 @@ class Character:
         self.col = col
         # print(self.row)
 
+    def set_rotation(self, rot):
+        self.dir = rot
+
     def rotate(self, rot):
         self.dir += rot
         self.dir = self.dir % 360
@@ -125,15 +130,15 @@ class Character:
     def get_direction(self):
         return self.dir
 
-
 class Game:
     def __init__(self):
+        self.at_game_start = True
         self.game_won = False
         # self.prev_text = ""
         # self.cur_text = ""
         self.map = Map()
-        char_start_row, char_start_col = self.place_character()
-        self.char = Character(char_start_row, char_start_col, 0)
+        self.char_start_row, self.char_start_col = self.place_character()
+        self.char = Character(self.char_start_row, self.char_start_col, 0)
         # self.error = Error()
         self.data = Data("", "", 'kanji')
 
@@ -147,18 +152,21 @@ class Game:
 
         return row, col
 
-    def update_data(self, id, display_text, kanji_text, display_type, error):
-        self.data.update(id, display_text, kanji_text, display_type, error)
+    def update_data(self, display_text, kanji_text, display_type, error):
+        self.data.update(display_text, kanji_text, display_type, error)
 
     def update_error(self, display_error, error_chars):
         self.error.update(display_error, error_chars)
+    
+    def update_game_start(self, val):
+        self.at_game_start = val
 
     def load_prev_text(self):
         return self.prev_text
 
     # Reset game data to default values - keeps map the same but character is sent back to start
     def reset_game(self):
-        self.char = Character(char_start_row, char_start_col, 0)
+        self.char = Character(self.char_start_row, self.char_start_col, 0)
         self.data = Data("", "", 'kanji')
 
     def get_character(self):
@@ -167,12 +175,29 @@ class Game:
     def get_game_won(self):
         return self.game_won
 
+    def get_game_start(self):
+        return self.at_game_start
+
+    def get_display_text(self):
+        return self.data.display_text
+
+    def get_display_type(self):
+        return self.data.display_type
+    
+    def get_errors(self):
+        return self.data.erro
+
     def valid_move(self, node_at_new_loc):
         valid_move = False
         if node_at_new_loc == "_" or node_at_new_loc == "i" or node_at_new_loc == "T" or node_at_new_loc == "S":
             valid_move = True
         
         return valid_move
+
+    def load_config(self, config):
+        self.char.set_location(config['char_row'], config['char_col'])
+        self.char.set_rotation(config['char_dir'])
+        self.data.update(config['data']['displayText'], config['data']['kanjiText'], config['data']['displayType'], config['data']['error'])
 
     # Performs move if valid
     def make_move(self, move):
@@ -227,9 +252,6 @@ class Game:
             # print(f"Row: {self.char.get_row()}")
         return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
-        # return not_valid_move, game_winning_move
-
-        # Returns game data as json
     def to_json(self):
         map = self.map.get_map()
         return {
@@ -239,6 +261,7 @@ class Game:
             'char_col': self.char.get_col(),
             'char_dir': self.char.get_direction(),
             'game_won': self.get_game_won(),
+            'at_game_start': self.get_game_start(),
             'data': self.data.to_json()
         }
 
@@ -248,7 +271,27 @@ class GameFactory:
 
     def new_game(self):
         self.game = Game()
+        self.game_states = []
         self.game_exists = True
+        self.game_state_count = 0
+
+    # Saves the current game state so that it can be reverted to
+    def save_game_state(self):
+        self.game_states.append(self.game.to_json())
+        print("SAVING GAME STATE")
+        self.game_state_count += 1
+        if self.game_state_count > 1:
+            self.game.update_game_start(False)
+
+    # Loads the previous game state into the Game object to 'undo' a move, then removes state from the list
+    def load_previous_config(self):
+        print("GAME STATES:")
+        print(self.game_states)
+        self.game.load_config(self.game_states[self.game_state_count-2])
+        last_state = self.game_states.pop()
+        self.game_state_count -= 1
+        if self.game_state_count == 0:
+            self.game.update_game_start(True)
 
 # gameFac = GameFactory()
 # gameFac.new_game()

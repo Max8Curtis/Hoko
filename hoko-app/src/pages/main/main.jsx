@@ -40,7 +40,7 @@ import Shrine from '../../assets/map/shrine.png'
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText}) {
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame}) {
 
 
     // TODO: Move all movement functions to App.js so they can be called once move is returned from /audio
@@ -166,33 +166,23 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
         // }
     });
 
-    useEffect(() => {
-        fetch('/start').then((res) =>
-            res.json().then((gameConfig) => {
-                setgameConfig({
-                    config: gameConfig.message
-                });
-            })
-        );
-        console.log("New config:")
-        console.log(gameConfig)
-    }, []);
+    
 
-    const [data, setdata] = useState({
-        msgData: {
-            id: "",
-            displayText: "",
-            kanjiText: "",
-            displayType: "kanji",
-            error: {
-                displayError: false,
-                errorChars: []
-            }
-        }
-    });
+    // const [data, setdata] = useState({
+    //     msgData: {
+    //         id: "",
+    //         displayText: "",
+    //         kanjiText: "",
+    //         displayType: "kanji",
+    //         error: {
+    //             displayError: false,
+    //             errorChars: []
+    //         }
+    //     }
+    // });
 
     const [isHelpOpen, setisHelpOpen] = useState(false);
-    const [isWinOpen, setisWinOpen] = useState(gameConfig.config['game_won']);
+    const [isWinOpen, setisWinOpen] = useState(config['game_won']);
 
 
     function toggleHelpPopup() {
@@ -204,28 +194,17 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
         setisWinOpen(!isWinOpen)
     }
 
-    //API functions
-    //Can upgrade to a POST, sending number of targets to choose from
-    function startGame() {
-        fetch('/start').then((res) =>
-            res.json().then((gameConfig) => {
-                setgameConfig({
-                    config: gameConfig.message
-                });
-            })
-        );
-        console.log(gameConfig)
-    }
 
-    function fetchData() {
-        fetch("/data").then((res) =>
-            res.json().then((data) => {
-                setdata({
-                    msgData: data.message
-                });
-            })
-        );
-    };
+
+    // function fetchData() {
+    //     fetch("/data").then((res) =>
+    //         res.json().then((data) => {
+    //             setdata({
+    //                 msgData: data.message
+    //             });
+    //         })
+    //     );
+    // };
 
     
 
@@ -255,53 +234,53 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     //     })
     // }
 
-    function undoMove() {
-        fetch("/undo").then((res) =>
-            res.json().then((data) => {
-                setdata({
-                    msgData: data.message
-                });
-            })
-        );
-    }
+    // function undoMove() {
+    //     fetch("/undo").then((res) =>
+    //         res.json().then((data) => {
+    //             setdata({
+    //                 msgData: data.message
+    //             });
+    //         })
+    //     );
+    // }
 
-    function turnCharLeft() {
-        setdata({
-            msgData: {
-                id: data.msgData['id'],
-                displayText: "左に曲がります",
-                kanjiText: "左に曲がります",
-                displayType: 'romaji',
-                error: {
-                    displayError: data.msgData.error['displayError'],
-                    errorChars: data.msgData.error['errorChars']
-                }
-            }
-        });
+    // function turnCharLeft() {
+    //     setdata({
+    //         msgData: {
+    //             id: data.msgData['id'],
+    //             displayText: "左に曲がります",
+    //             kanjiText: "左に曲がります",
+    //             displayType: 'romaji',
+    //             error: {
+    //                 displayError: data.msgData.error['displayError'],
+    //                 errorChars: data.msgData.error['errorChars']
+    //             }
+    //         }
+    //     });
         
         // callMove()
         // console.log(gameConfig)
         // console.log(isWinOpen)
-    }
+    // }
 
-    function moveCharForward() {
-        setdata({
-            msgData: {
-                id: data.msgData['id'],
-                displayText: "まっすぐ行って",
-                kanjiText: "まっすぐ行って",
-                displayType: 'romaji',
-                error: {
-                    displayError: data.msgData.error['displayError'],
-                    errorChars: data.msgData.error['errorChars']
-                }
-            }
-        });
+    // function moveCharForward() {
+        // setdata({
+        //     msgData: {
+        //         id: data.msgData['id'],
+        //         displayText: "まっすぐ行って",
+        //         kanjiText: "まっすぐ行って",
+        //         displayType: 'romaji',
+        //         error: {
+        //             displayError: data.msgData.error['displayError'],
+        //             errorChars: data.msgData.error['errorChars']
+        //         }
+        //     }
+        // });
         
         // callMove()
         // console.log(gameConfig)
         // console.log(isWinOpen)
-    }
+    // }
 
 
     // function turnCharRight() {
@@ -357,13 +336,13 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={turnCharLeft} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={reset} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undo} />
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undo} disabled={config['at_game_start']} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
@@ -386,7 +365,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={moveCharForward} /> {/*toggleHelpPopup} /> */} 
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={toggleHelpPopup} />  
                                         <h2 className='button-label'>Help</h2>
                                         {isHelpOpen && <Popup
                                             content={
@@ -459,10 +438,10 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                         </Grid>
                                         <Grid item>
                                             <div style={{ height: 80, width: 80, borderRadius: 4, border: '1px solid black' }}>
-                                                {gameConfig.config['target'] != "" &&
-                                                    <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4} />
+                                                {config['target'] != "" &&
+                                                    <Target chosenTarget={targets[config['target']]['image']} borderRadius={4} />
                                                 }
-                                                {gameConfig.config['target'] == "" &&
+                                                {config['target'] == "" &&
                                                     <Target chosenTarget={white_square} borderRadius={4} />
                                                 }
 
@@ -471,10 +450,10 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                         <Grid item>
                                             <div style={{ width: 150, maxWidth: 150, textAlign: 'center' }}>
 
-                                                {gameConfig.config['target'] != "" &&
-                                                    <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
+                                                {config['target'] != "" &&
+                                                    <h2 className='button-label'>{targets[config['target']]['japanese']}</h2>
                                                 }
-                                                {gameConfig.config['target'] == "" &&
+                                                {config['target'] == "" &&
                                                     <h2 className='button-label'>-</h2>
                                                 }
                                             </div>
@@ -493,15 +472,16 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                 </Grid>
                 <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.msgData['displayText']} width={600} rows={4} />
+                        <Dialog text={config['data']['displayText']} width={600} rows={4} />
                         <Grid container direction="row" justifyContent="space-between">
                             <div>
-                                {data.msgData['error']['displayError'] &&
+                                {config['data']['error']['displayError'] &&
                                     <p style={{ color: "red" }}>{errorMsg}</p>
                                 }
                             </div>
-                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={22} buttonText={Capitalize(data.msgData['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={Capitalize(config['data']['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
                         </Grid>
+                        <div style={{ height: 50, backgroundColor: '#D2E3DF' }}></div>
                     </Grid>
                 </Grid>
             </Grid>

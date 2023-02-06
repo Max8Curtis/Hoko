@@ -27,10 +27,11 @@ parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 
 gameFactory = game_structs.GameFactory()
-gameFactory.new_game()
-print("Default game:")
-print(gameFactory.game.to_json())
-print(f"Char location: {gameFactory.game.get_character().get_row()} {gameFactory.game.get_character().get_col()} {gameFactory.game.get_character().get_direction()}")
+# gameFactory.new_game()
+# gameFactory.save_game_state()
+# print("Default game:")
+# print(gameFactory.game.to_json())
+# print(f"Char location: {gameFactory.game.get_character().get_row()} {gameFactory.game.get_character().get_col()} {gameFactory.game.get_character().get_direction()}")
 
 class API:
     ## Test endpoint
@@ -44,11 +45,10 @@ class API:
     @app.route('/start')
     def start_game():
         gameFactory.new_game()
-        game = gameFactory.game
-        config = game.to_json()
+        gameFactory.save_game_state()
+        config = gameFactory.game.to_json()
         print("New game:")
         print(config)
-        # config = example.new_config([1,2,3,4,5,6,7,8,9])
         return {
             'message': config
         }
@@ -72,6 +72,7 @@ class API:
 
     @app.route('/reset')
     def reset_game():
+
         gameFactory.game.reset_game()
         config = gameFactory.game.to_json()
         return {
@@ -103,18 +104,32 @@ class API:
         move = convert_text.predict(nlp, text)
         # print(move)
         new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
+
+        if valid_move:
+             
+            # Convert text to display_type
+            display_type = gameFactory.game.get_display_type()
+            if display_type == 'romaji':
+                # print(f"game text: {gameFactory.game.get_display_text()}")
+                display_text = kanji_to_romaji(text)
+            else:
+                display_text = text
+            # print(f"display text: {display_text}")
+            gameFactory.game.update_data(display_text, text, display_type, {'display_error': gameFactory.game.data.error.display_error, 'error_chars':gameFactory.game.data.error.error_chars})
+            
+            gameFactory.save_game_state()
         config = gameFactory.game.to_json()
         print(config)
         return {
             'message': config
         }
 
-    @app.route('/speak')
-    def new_speech():
-        kanji_text, display_error, error_chars = example.get_user_speech()
-        return {
-            'message': data
-        }
+    # @app.route('/speak')
+    # def new_speech():
+    #     kanji_text, display_error, error_chars = example.get_user_speech()
+    #     return {
+    #         'message': data
+    #     }
 
     # Switch the script used for displaying text
     @app.route('/switch', methods=['POST'])
@@ -122,15 +137,9 @@ class API:
         data = json.loads(request.data)
         print(data)
         if data['data']['displayType'] == 'kanji':
-            kks = pk.kakasi()
-            result = kks.convert(data['data']['displayText'])
-            romaji_text = ""
-            for word in result:
-                romaji_text += word['hepburn'] + " "
-            romaji_text = romaji_text[:len(romaji_text)-1]
+            romaji_text = kanji_to_romaji(data['data']['displayText'])
 
-        
-        gameFactory.game.data.update(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error':False, 'error_chars':[]})
+        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': False, 'error_chars':[]})
         config = gameFactory.game.to_json()
         # print(newMsgData.to_json())
         return {
@@ -139,14 +148,25 @@ class API:
 
     @app.route('/undo')
     def retrieve_previous():
-        previousText = gameFactory.game.get_previous_text()
-        gameFactory.game.load_previous_config()
+
+        # TODO: ADD FUNCTIONALITY TO DISABLE UNDO BUTTON IF ALREADY AT START OF GAME
+
+        gameFactory.load_previous_config()
         config = gameFactory.game.to_json()
         return {
-            'message': {'previous_text': previousText,
-                        'previous_config': config
-                    }
+            'message': config
         }
+
+def kanji_to_romaji(text):
+    kks = pk.kakasi()
+    result = kks.convert(text)
+    romaji_text = ""
+    for word in result:
+        romaji_text += word['hepburn'] + " "
+    romaji_text = romaji_text[:len(romaji_text)-1]
+    
+    return romaji_text
+
 
 if __name__ == "__main__":
     app.run()

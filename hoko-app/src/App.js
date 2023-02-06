@@ -23,6 +23,7 @@ class App extends React.Component {
           char_col: 3,
           char_dir: 0,
           game_won: false,
+          at_game_start: true,
           data: {
             displayText: "",
             kanjiText: "",
@@ -34,7 +35,6 @@ class App extends React.Component {
           }
       }
     };
-    console.log(this.state.config)
   }
 
   assignState = (data) => {
@@ -44,7 +44,7 @@ class App extends React.Component {
       displayType: data.message['data']['displayType'],
       error: data.message['data']['error']
     }
-    // console.log(newDataConfig)
+
     const newConfig = {
       target: data.message['target'], 
       map: data.message['map'],
@@ -52,11 +52,10 @@ class App extends React.Component {
       char_col: data.message['char_col'],
       char_dir: data.message['char_dir'],
       game_won: data.message['game_won'],
+      at_game_start: data.message['at_game_start'],
       data: newDataConfig
     }
-    console.log(newConfig)
     this.setState({config: newConfig })
-    // console.log(this.state.config)
   }
   
   // handleSave = async () => {
@@ -84,6 +83,21 @@ class App extends React.Component {
   //     console.log(err);
   //   });
   // };
+
+
+    //API functions
+  //Can upgrade to a POST, sending number of targets to choose from
+  startGame = () => {
+      fetch('/start').then(async (res) => {
+          const data = await res.json();
+          this.assignState(data)
+          console.log(this.state.config)
+      })
+      .catch((err) => {
+          console.log(err);
+      });
+      
+  }
 
   start = () => {
     if (this.state.isBlocked) {
@@ -118,7 +132,6 @@ class App extends React.Component {
     for (var [key, value] of formData.entries()) { 
       console.log(key, value);
     }
-    console.log(this.state.config)
     
     fetch("/audio", {
       method: 'POST',
@@ -127,10 +140,7 @@ class App extends React.Component {
     })
     .then(async (res) => {
       const data = await res.json();
-      console.log(data.message['target'])
       this.assignState(data)
-      console.log(this.state.config);
-      console.log("Hi")
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -144,16 +154,7 @@ class App extends React.Component {
   resetGame = () => {
     fetch("/reset").then(async (res) => {
       const data = await res.json();
-      console.log(data.message['target'])
-      const newConfig = {
-            target: data.message['target'], 
-            map: data.message['map'],
-            char_row: data.message['char_row'],
-            char_col: data.message['char_col'],
-            char_dir: data.message['char_dir'],
-            game_won: data.message['game_won']}
-      this.setState({config: newConfig })
-      console.log(this.state.config);
+      this.assignState(data)
       console.log("Game has been reset")
       if (!res.ok) {
         const err = (data && data.message) || res.status;
@@ -168,17 +169,7 @@ class App extends React.Component {
   undoMove = () => {
     fetch("/undo").then(async (res) => {
       const data = await res.json();
-      console.log(data.message)
-      // const newConfig = {
-      //       target: data.message['target'], 
-      //       map: data.message['map'],
-      //       char_row: data.message['char_row'],
-      //       char_col: data.message['char_col'],
-      //       char_dir: data.message['char_dir'],
-      //       game_won: data.message['game_won']}
-      // this.setState({config: newConfig })
-      // console.log(this.state.config);
-      // console.log("Game has been reset")
+      this.assignState(data)
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -187,13 +178,16 @@ class App extends React.Component {
       .catch((err) => {
         console.log(err);
       });
+      console.log(this.state.config)
     };
 
     switch = () => {
-      console.log(this.state.config)
       if (this.state.config['data']['displayType'] == 'romaji') {
-          this.state.config['data']['displayText'] = this.state.config['data']['kanjiText']
-          this.state.config['data']['displayType'] = 'kanji'       
+          const data = {'message': this.state.config}
+          data.message['data']['displayText'] = this.state.config['data']['kanjiText']
+          data.message['data']['displayType'] = 'kanji'
+          this.assignState(data)
+              
       } else {
           fetch("/switch", {
               method: 'POST',
@@ -201,12 +195,9 @@ class App extends React.Component {
               body: JSON.stringify(this.state.config)
           }).then(async (res) => {
               const data = await res.json()
-              console.log(data)
-              console.log(data.message['data']['displayType'])
               this.assignState(data)
           });
       }
-      // console.log(this.state.config)
   };
 
   componentDidMount() {
@@ -225,7 +216,7 @@ class App extends React.Component {
   render(){
     return (
       <>
-        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} />
+        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} />
       </>
     );
   }
