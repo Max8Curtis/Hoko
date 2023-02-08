@@ -37,229 +37,287 @@ import Parking from '../../assets/map/parking.png'
 import FishShop from '../../assets/map/fish_shop.png'
 import Shrine from '../../assets/map/shrine.png'
 
-function Main() {
+import white_square from '../../assets/white_square.png'
+import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-    const [audio, setAudio] = useState({
-        audioDetails: {
-            url: null,
-            blob: null,
-            chunks: null,
-            duration: {
-                h: 0,
-                m: 0,
-                s: 0
-            }
-        }
-    });
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame}) {
 
-    function handleAudioStop(data){
-        console.log(data)
-        setAudio({ audioDetails: data });
-    }
-    
-    function handleAudioUpload(file) {
-        console.log(file);
-    }
-    
-    function handleCountDown(data) {
-        console.log(data);
-    }
-    
-    function handleReset() {
-        const reset = {
-            url: null,
-            blob: null,
-            chunks: null,
-            duration: {
-                h: 0,
-                m: 0,
-                s: 0
-            }
-        };
-        setAudio({ audioDetails: reset });
-    }
-    
+
+    // TODO: Move all movement functions to App.js so they can be called once move is returned from /audio
+
+    // const [audio, setAudio] = useState({
+    //     audioDetails: {
+    //         url: null,
+    //         blob: null,
+    //         chunks: null,
+    //         duration: {
+    //             h: 0,
+    //             m: 0,
+    //             s: 0
+    //         }
+    //     }
+    // });
+
+    // function handleAudioStop(data) {
+    //     console.log(data)
+    //     setAudio({ audioDetails: data });
+    // }
+
+    // function handleAudioUpload(file) {
+    //     console.log(file);
+    // }
+
+    // function handleCountDown(data) {
+    //     console.log(data);
+    // }
+
+    // function handleReset() {
+    //     const reset = {
+    //         url: null,
+    //         blob: null,
+    //         chunks: null,
+    //         duration: {
+    //             h: 0,
+    //             m: 0,
+    //             s: 0
+    //         }
+    //     };
+    //     setAudio({ audioDetails: reset });
+    // }
+
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
     let mapImageDisplayHeight = (mapImageDisplayWidth / mapImageWidth) * mapImageHeight
 
-    function Capitalize(str){
+    function Capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
-   
+
+    // TODO: Change page to get targets struct from API whenever neeeded, instead of storing here
     const targets = {
-        1: {
-            name: 'Bank',
-            image: Bank,
-            japanese: 'ぎんこう'
-        },
-        2: {
-            name: 'Cinema',
-            image: Cinema,
-            japanese: 'えいがかん'
-        },
-        3: {
+        "A": {
             name: 'Grocery',
             image: Grocery,
             japanese: 'スーパー'
         },
-        4: {            
-            name: 'Hospital',
-            image: Hospital,
-            japanese: 'びょういん'
-        },
-        5: {
-            name: 'Lake',
-            image: Lake,
-            japanese: 'みずうみ'
-        },
-        6: {
-            name: 'Sake shop',
-            image: SakeShop,
-            japanese: 'おさけや'
-        },
-        7: {
-            name: 'Parking',
-            image: Parking,
-            japanese: 'パーキング'
-        },
-        8: {
+        "B": {
             name: 'Fish shop',
             image: FishShop,
             japanese: 'さかなや'
         },
-        9: {
+        "C": {
+            name: 'Sake shop',
+            image: SakeShop,
+            japanese: 'おさけや'
+        },
+        "D": {
+            name: 'Lake',
+            image: Lake,
+            japanese: 'みずうみ'
+        },
+        "E": {
+            name: 'Parking',
+            image: Parking,
+            japanese: 'パーキング'
+        },
+        "F": {
             name: 'Shrine',
             image: Shrine,
             japanese: 'じんじゃ'
-        }
+        },
+        "G": {
+            name: 'Cinema',
+            image: Cinema,
+            japanese: 'えいがかん'
+        },
+        "H": {
+            name: 'Bank',
+            image: Bank,
+            japanese: 'ぎんこう'
+        },
+        "I": {
+            name: 'Hospital',
+            image: Hospital,
+            japanese: 'びょういん'
+        },
     }
 
     //Structs
     const errorMsg = 'Your voice was unrecognizable, please repeat.';
     const speakingTooltip = 'Speak to move character';
     const stopTooltip = 'Stop recording speech';
-    const [speak, setspeak] = useState({
-        speaking: false,
-        image: micImage,
-        func: getSpeech,
-        tooltip: speakingTooltip
-    });
+    // const [speak, setspeak] = useState({
+    //     speaking: false,
+    //     image: micImage,
+    //     func: getSpeech,
+    //     tooltip: speakingTooltip
+    // });
 
-    //Default target to 1 so page loads
     const [gameConfig, setgameConfig] = useState({
-        config: {
-            target: 1
-        }
+        config: config
+        // config: {
+        //     target: "",
+        //     map: "",
+        //     char_row: 5,
+        //     char_col: 4,
+        //     char_dir: 0,
+        //     game_won: false
+        // }
     });
 
-    const [data, setdata] = useState({
-        msgData: {
-            id: "",
-            displayText: "",
-            kanjiText: "",
-            displayType: "kanji",
-            error: {
-                displayError: false,
-                errorChars: []
-            }
-        }
-    });
-
-    const [isOpen, setisOpen] = useState(false);
-
-    function togglePopup() {
-        setisOpen(!isOpen);
-    }
-
-    //API functions
-    //Can upgrade to a POST, sending number of targets to choose from
-    function startGame() {
-        fetch('/start').then((res) =>
-            res.json().then((data) => {
-                setgameConfig({
-                    config: data.message
-                });
-            })
-        );
-    }
     
-    function fetchData() {
-        fetch("/data").then((res) =>
-            res.json().then((data) => {
-                setdata({
-                    msgData: data.message
-                });
-            })
-        );
-    };
 
-    function swapData() {
-        if (data.msgData['displayType'] == 'romaji') {
-            setdata({
-                msgData: {
-                    id: data.msgData['id'],
-                    displayText: data.msgData['kanjiText'],
-                    kanjiText: data.msgData['kanjiText'],
-                    displayType: 'kanji',
-                    error: {
-                        displayError: data.msgData.error['displayError'],
-                        errorChars: data.msgData.error['errorChars']
-                    }
-                }
-            });
-        } else {
-            fetch("/switch", {
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify(data)
-            }).then((res) =>
-                res.json().then((data) => {
-                    setdata({
-                        msgData: data.message
-                    });
-                })
-            );
-        }
-    };
+    // const [data, setdata] = useState({
+    //     msgData: {
+    //         id: "",
+    //         displayText: "",
+    //         kanjiText: "",
+    //         displayType: "kanji",
+    //         error: {
+    //             displayError: false,
+    //             errorChars: []
+    //         }
+    //     }
+    // });
 
-    function stopSpeaking() {
-        //pass
-        setspeak({
-            speaking: false,
-            image: micImage,
-            func: getSpeech,
-            tooltip: speakingTooltip
-        })
+    const [isHelpOpen, setisHelpOpen] = useState(false);
+    const [isWinOpen, setisWinOpen] = useState(config['game_won']);
+
+
+    function toggleHelpPopup() {
+        setisHelpOpen(!isHelpOpen);
     }
 
-    function getSpeech() {
-        fetch("/speak").then((res) =>
-            res.json().then((data) => {
-                setdata({
-                    msgData: data.message
-                });
-            })
-        );
-        setspeak({
-            speaking: true,
-            image: stopImage,
-            func: stopSpeaking,
-            tooltip: stopTooltip
-        })
+    function toggleWinPopup() {
+        console.log(isWinOpen)
+        setisWinOpen(!isWinOpen)
     }
 
-    function undoMove() {
-        fetch("/undo").then((res) =>
-        res.json().then((data) => {
-            setdata({
-                msgData: data.message
-            });
-        })
-    );
 
-    }
+
+    // function fetchData() {
+    //     fetch("/data").then((res) =>
+    //         res.json().then((data) => {
+    //             setdata({
+    //                 msgData: data.message
+    //             });
+    //         })
+    //     );
+    // };
+
+    
+
+    // function stopSpeaking() {
+    //     //pass
+    //     setspeak({
+    //         speaking: false,
+    //         image: micImage,
+    //         func: getSpeech,
+    //         tooltip: speakingTooltip
+    //     })
+    // }
+
+    // function getSpeech() {
+    //     fetch("/speak").then((res) =>
+    //         res.json().then((data) => {
+    //             setdata({
+    //                 msgData: data.message
+    //             });
+    //         })
+    //     );
+    //     setspeak({
+    //         speaking: true,
+    //         image: stopImage,
+    //         func: stopSpeaking,
+    //         tooltip: stopTooltip
+    //     })
+    // }
+
+    // function undoMove() {
+    //     fetch("/undo").then((res) =>
+    //         res.json().then((data) => {
+    //             setdata({
+    //                 msgData: data.message
+    //             });
+    //         })
+    //     );
+    // }
+
+    // function turnCharLeft() {
+    //     setdata({
+    //         msgData: {
+    //             id: data.msgData['id'],
+    //             displayText: "左に曲がります",
+    //             kanjiText: "左に曲がります",
+    //             displayType: 'romaji',
+    //             error: {
+    //                 displayError: data.msgData.error['displayError'],
+    //                 errorChars: data.msgData.error['errorChars']
+    //             }
+    //         }
+    //     });
+        
+        // callMove()
+        // console.log(gameConfig)
+        // console.log(isWinOpen)
+    // }
+
+    // function moveCharForward() {
+        // setdata({
+        //     msgData: {
+        //         id: data.msgData['id'],
+        //         displayText: "まっすぐ行って",
+        //         kanjiText: "まっすぐ行って",
+        //         displayType: 'romaji',
+        //         error: {
+        //             displayError: data.msgData.error['displayError'],
+        //             errorChars: data.msgData.error['errorChars']
+        //         }
+        //     }
+        // });
+        
+        // callMove()
+        // console.log(gameConfig)
+        // console.log(isWinOpen)
+    // }
+
+
+    // function turnCharRight() {
+    //     console.log(config)
+    //     // console.log(gameConfig)
+    //     setdata({
+    //         msgData: {
+    //             id: data.msgData['id'],
+    //             displayText: "右に曲がります",
+    //             kanjiText: "右に曲がります",
+    //             displayType: 'romaji',
+    //             error: {
+    //                 displayError: data.msgData.error['displayError'],
+    //                 errorChars: data.msgData.error['errorChars']
+    //             }
+    //         }
+    //     });
+        
+    //     callMove()
+        // console.log(gameConfig)
+        // console.log(isWinOpen)
+    // }
+
+    // function callMove() {
+    //     fetch("/move", {
+    //         method: 'POST',
+    //         mode: 'cors',
+    //         body: JSON.stringify(data)
+    //     }).then((res) =>
+    //         res.json().then((gameConfig) => {
+    //             setgameConfig({
+    //                 config: gameConfig.message
+    //             });
+    //         })
+    //     );
+    //     setisWinOpen(gameConfig.config['game_won'])
+    // }
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -273,34 +331,43 @@ function Main() {
                     <h2 style={{ fontSize: 40, fontFamily: 'MS Mincho' }}>Hōkō</h2>
                 </Grid>
                 <Grid item xs={12} style={{ marginTop: 15 }}>
-                    <Grid container direction="row" alignItems="center" columnSpacing={{md:19}}>
+                    <Grid container direction="row" alignItems="center" columnSpacing={{ md: 19 }}>
                         <Grid item xs={2.3}>
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={fetchData} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={reset} disabled={config['at_game_start']} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undoMove}/>
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undo} disabled={config['at_game_start']} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={speak.func} />
+                                        {recording &&
+                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={stop} />
+                                        }
+                                        {!recording &&
+                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={start} />
+                                        }
+                                        {/* <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} /> */}
                                         <h2 className='button-label'>
-                                            {speak.speaking ? 'Stop'  : 'Speak'}
+                                            {recording ? 'Stop' : 'Speak'}
                                         </h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
+                                    <audio src={audioURL} controls="controls" hidden/>
+                                </Grid>
+                                <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={togglePopup} />
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={toggleHelpPopup} />  
                                         <h2 className='button-label'>Help</h2>
-                                        {isOpen && <Popup
+                                        {isHelpOpen && <Popup
                                             content={
                                                 <>
                                                     <Box sx={{ height: '100%' }}>
@@ -315,82 +382,106 @@ function Main() {
                                                             <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
                                                             <p>If part of your speech is unrecognizable, the relevant part will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is recognizable!</p>
                                                             <h3>Targets</h3>
-                                                            <div>                                                           
+                                                            <div>
                                                                 <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
                                                                     <Grid item>
                                                                         <Grid container direction="row" justifyContent="space-between" alignItems="center">
-                                                                            <PopupImage targets={targets} targetNumber={1} />
-                                                                            <PopupImage targets={targets} targetNumber={2} />
-                                                                            <PopupImage targets={targets} targetNumber={3} />
-                                                                            <PopupImage targets={targets} targetNumber={4} />                                                                   
-                                                                        </Grid>                                                                  
+                                                                            <PopupImage targets={targets} target={"A"} />
+                                                                            <PopupImage targets={targets} target={"B"} />
+                                                                            <PopupImage targets={targets} target={"C"} />
+                                                                            <PopupImage targets={targets} target={"D"} />
+                                                                        </Grid>
                                                                     </Grid>
                                                                     <Grid item>
                                                                         <Grid container direction="row" justifyContent="flex-start" alignItems="center">
-                                                                            <PopupImage targets={targets} targetNumber={5} /> 
-                                                                            <PopupImage targets={targets} targetNumber={6} /> 
-                                                                            <PopupImage targets={targets} targetNumber={7} /> 
-                                                                            <PopupImage targets={targets} targetNumber={8} /> 
-                                                                            <PopupImage targets={targets} targetNumber={9} /> 
+                                                                            <PopupImage targets={targets} target={"E"} />
+                                                                            <PopupImage targets={targets} target={"F"} />
+                                                                            <PopupImage targets={targets} target={"G"} />
+                                                                            <PopupImage targets={targets} target={"H"} />
+                                                                            <PopupImage targets={targets} target={"I"} />
                                                                         </Grid>
                                                                     </Grid>
-                                                                </Grid>                                                                                                      
+                                                                </Grid>
                                                             </div>
-                                                        </Grid> 
+                                                        </Grid>
                                                     </Box>
                                                 </>
                                             }
-                                            handleClose={togglePopup}
-                                            />
+                                            handleClose={toggleHelpPopup}
+                                        />
                                         }
-                                    </Grid>                                
+                                        {isWinOpen && <Popup
+                                            content={
+                                                <>
+                                                    <div style={{textAlign: 'center'}}>
+                                                        <h1>Congratulations!</h1>
+                                                        <h3>You have successfully navigated to the correct target!</h3>
+                                                    </div>
+                                                </>
+                                            }
+                                            handleClose={toggleWinPopup}
+                                        />
+                                        }
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={7.4}>
-                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charX={1} charY={1} rotation={0} style={{paddingLeft:50}}/>
+                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charRow={config['char_row']} charCol={config['char_col']} charDir={config['char_dir']} style={{ paddingLeft: 50 }} />
                         </Grid>
                         <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
                                 <Grid item>
-                                    <Grid container direction="column" justifyContent="space-evenly" alignItems="center" style={{marginBottom: 60}}>
+                                    <Grid container direction="column" justifyContent="space-evenly" alignItems="center" style={{ marginBottom: 60 }}>
                                         <Grid item>
                                             <h2 className='button-label'>Target:</h2>
                                         </Grid>
                                         <Grid item>
-                                            <div style={{height: 80, width: 80, borderRadius: 4, border: '1px solid black'}}>
-                                                <Target chosenTarget={targets[gameConfig.config['target']]['image']} borderRadius={4}/>
-                                                
+                                            <div style={{ height: 80, width: 80, borderRadius: 4, border: '1px solid black' }}>
+                                                {config['target'] != "" &&
+                                                    <Target chosenTarget={targets[config['target']]['image']} borderRadius={4} />
+                                                }
+                                                {config['target'] == "" &&
+                                                    <Target chosenTarget={white_square} borderRadius={4} />
+                                                }
+
                                             </div>
                                         </Grid>
                                         <Grid item>
-                                            <div style={{width:150, maxWidth:150, textAlign:'center'}}>
-                                                <h2 className='button-label'>{targets[gameConfig.config['target']]['japanese']}</h2>
+                                            <div style={{ width: 150, maxWidth: 150, textAlign: 'center' }}>
+
+                                                {config['target'] != "" &&
+                                                    <h2 className='button-label'>{targets[config['target']]['japanese']}</h2>
+                                                }
+                                                {config['target'] == "" &&
+                                                    <h2 className='button-label'>-</h2>
+                                                }
                                             </div>
-                                        </Grid>                   
+                                        </Grid>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame}/>
+                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame} />
                                         <h2 className='button-label'>Start</h2>
                                     </Grid>
-                                </Grid>                               
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} style={{ marginTop: 20}}>
+                <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={data.msgData['displayText']} width={600} rows={4}/>
+                        <Dialog text={config['data']['displayText']} width={600} rows={4} />
                         <Grid container direction="row" justifyContent="space-between">
                             <div>
-                                {data.msgData['error']['displayError'] &&
-                                    <p style={{color: "red"}}>{errorMsg}</p>                                    
+                                {config['data']['error']['displayError'] &&
+                                    <p style={{ color: "red" }}>{errorMsg}</p>
                                 }
                             </div>
-                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={22} buttonText={Capitalize(data.msgData['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={swapData} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={Capitalize(config['data']['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
                         </Grid>
+                        <div style={{ height: 50, backgroundColor: '#D2E3DF' }}></div>
                     </Grid>
                 </Grid>
             </Grid>

@@ -6,7 +6,7 @@ import './styles.css'
 function Popup({ content, handleClose }) {
 
     return (
-        <div className="popup-box">
+        <div className="popup-box" style={{ 'zIndex': 10 }}>
             <div className="box">
                 <span className="close-icon" onClick={handleClose}>x</span>
                 {content}
