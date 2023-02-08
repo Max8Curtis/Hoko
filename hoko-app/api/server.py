@@ -12,7 +12,6 @@ path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
 print(path)
 sys.path.insert(0, path)
 
-from speech import example
 from speech import game_structs
 from speech import convert_text
 from speech import recorder
