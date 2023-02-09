@@ -380,7 +380,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                                             <p>3. When the character is facing the target, you have completed the game!</p>
                                                             <h3>Pronunciation</h3>
                                                             <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
-                                                            <p>If part of your speech is unrecognizable, the relevant part will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is recognizable!</p>
+                                                            <p>If part of your speech has unclear pronunciation, the relevant characters will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is perfect!</p>
                                                             <h3>Targets</h3>
                                                             <div>
                                                                 <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
@@ -472,7 +472,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                 </Grid>
                 <Grid item xs={12} style={{ marginTop: 20 }}>
                     <Grid container direction="column" alignItems="flex-end">
-                        <Dialog text={config['data']['displayText']} width={600} rows={4} />
+                        <Dialog text={config['data']['displayText']} height={100} width={600} rows={4} />
                         <Grid container direction="row" justifyContent="space-between">
                             <div>
                                 {config['data']['error']['displayError'] &&

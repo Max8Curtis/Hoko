@@ -46,3 +46,9 @@
     width: 70px;
     height: 100%;
 }
+
+mark.error-char {
+    /* font-weight: bold; */
+    color: #E71D3F;
+    background: none;
+}
