@@ -177,23 +177,22 @@ class App extends React.Component {
       console.log(this.state.config)
     };
 
-    switch = () => {
-      if (this.state.config['data']['displayType'] == 'romaji') {
-          const data = {'message': this.state.config}
-          data.message['data']['displayText'] = this.state.config['data']['kanjiText']
-          data.message['data']['displayType'] = 'kanji'
+  switch = () => {
+    if (this.state.config['data']['displayType'] == 'romaji') {
+      const data = {'message': this.state.config}
+      data.message['data']['displayText'] = this.getEditedText(this.state.config['data']['kanjiText'], this.state.config['data']['error']['errorChars'])
+      data.message['data']['displayType'] = 'kanji'
+      this.assignState(data)             
+    } else {
+      fetch("/switch", {
+          method: 'POST',
+          mode: 'cors',
+          body: JSON.stringify(this.state.config)
+      }).then(async (res) => {
+          const data = await res.json()
           this.assignState(data)
-              
-      } else {
-          fetch("/switch", {
-              method: 'POST',
-              mode: 'cors',
-              body: JSON.stringify(this.state.config)
-          }).then(async (res) => {
-              const data = await res.json()
-              this.assignState(data)
-          });
-      }
+      });
+    }
   };
 
   componentDidMount() {

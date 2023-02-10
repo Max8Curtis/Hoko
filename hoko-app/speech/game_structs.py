@@ -236,9 +236,6 @@ class Game:
             elif curr_char_dir == 270 and curr_char_col >= 1:
                 new_row = curr_char_row
                 new_col = curr_char_col-1
-            
-            # print(new_row)
-            # print(new_col)
 
             # Check that move is within map boundary            
             if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
