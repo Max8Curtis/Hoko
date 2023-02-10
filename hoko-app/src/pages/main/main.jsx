@@ -380,7 +380,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                                             <p>3. When the character is facing the target, you have completed the game!</p>
                                                             <h3>Pronunciation</h3>
                                                             <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
-                                                            <p>If part of your speech has unclear pronunciation, the relevant characters will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is perfect!</p>
+                                                            <p style={{textAlign: 'center'}}>If part of your speech has unclear pronunciation, the relevant characters will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is perfect!</p>
                                                             <h3>Targets</h3>
                                                             <div>
                                                                 <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
