@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api, reqparse
-import pykakasi as pk
 import json
 import spacy
 import os
@@ -15,6 +14,7 @@ sys.path.insert(0, path)
 from speech import game_structs
 from speech import convert_text
 from speech import recorder
+from speech import structure
 
 nlp = spacy.load(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'model'))
 print(convert_text.predict(nlp, '100メートル行ってください'))
@@ -97,25 +97,40 @@ class API:
         # with open("audio.txt", "wb") as file: 
         #     file.write(content.read())
         # file = request.form.get('file')
-        text = recorder.recognize_speech(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'myspeech.wav'), 6)
-        # print(text)
-        text = '100メートル行ってください'
+        text, json_list = recorder.recognize_speech(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'myspeech1.wav'), 6, structure.Stack())
+
+        # Display error message if no audio detected
+        if text == "":
+            gameFactory.game.update_data(None, None, None, {'a': True, 'b':[]})
+            config = gameFactory.game.to_json()
+            print(config)
+            return {
+            'message': config
+            } 
+
+        ##### TESTING
+        # text = '100メートル行ってください'
+        #####
+
+        error_chars = []
         move = convert_text.predict(nlp, text)
-        # print(move)
         new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
 
-        if valid_move:
-             
+        if valid_move:  
             # Convert text to display_type
             display_type = gameFactory.game.get_display_type()
             if display_type == 'romaji':
-                # print(f"game text: {gameFactory.game.get_display_text()}")
-                display_text = kanji_to_romaji(text)
+                display_text = structure.kanji_to_romaji(text)
+
+                # Obtain list of characters where confidence is below the threshold
+                # error_chars = structure.romaji_eval_errors(json_list, 0.2)
             else:
                 display_text = text
-            # print(f"display text: {display_text}")
-            gameFactory.game.update_data(display_text, text, display_type, {'display_error': gameFactory.game.data.error.display_error, 'error_chars':gameFactory.game.data.error.error_chars})
-            
+
+                # Obtain list of characters where confidence is below the threshold
+                error_chars = structure.eval_errors(json_list, 0.2)
+
+            gameFactory.game.update_data(display_text, text, display_type, {'display_error': False, 'error_chars': error_chars})
             gameFactory.save_game_state()
         config = gameFactory.game.to_json()
         print(config)
@@ -134,11 +149,10 @@ class API:
     @app.route('/switch', methods=['POST'])
     def switch_kanji():
         data = json.loads(request.data)
-        print(data)
         if data['data']['displayType'] == 'kanji':
-            romaji_text = kanji_to_romaji(data['data']['displayText'])
+            romaji_text = structure.kanji_to_romaji(data['data']['kanjiText'])
 
-        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': False, 'error_chars':[]})
+        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': data['data']['error']['displayError'], 'error_chars':data['data']['error']['errorChars']})
         config = gameFactory.game.to_json()
         # print(newMsgData.to_json())
         return {
@@ -156,15 +170,9 @@ class API:
             'message': config
         }
 
-def kanji_to_romaji(text):
-    kks = pk.kakasi()
-    result = kks.convert(text)
-    romaji_text = ""
-    for word in result:
-        romaji_text += word['hepburn'] + " "
-    romaji_text = romaji_text[:len(romaji_text)-1]
-    
-    return romaji_text
+
+
+
 
 
 if __name__ == "__main__":

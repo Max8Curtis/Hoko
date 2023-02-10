@@ -48,7 +48,7 @@ def read_audio(filename):
         audio = file.read()
     return audio
 
-def recognize_speech(audiofile, duration):
+def recognize_speech(audiofile, duration, stack):
     
     # record_audio(duration, audiofile)
     
@@ -61,19 +61,47 @@ def recognize_speech(audiofile, duration):
                          data = audio)
     data = resp.content.decode("utf-8")
 
+    ###
+    # Clean up reponse data
     data = data.replace("\r", ",")
     data = data.replace(" ", "")
-    res = data.rfind("text")
-
-    text = ''
-    res += 7
-    while data[res] != '"':
-        text += data[res]
-        res+=1
-
     data = data.replace("\n","")
-    return text
+
+    json_list = decode_json(stack, data)
+
+        # If the JSON returned from Wit.ai is empty, json_list will be a bool, so `text` should be empty
+    if type(json_list) != type(False):
+        text = json_list[len(json_list)-1]['text']
+    else:
+        text = ""
+    #
+    ###
+
+    return text, json_list
+
+def decode_json(stack, text):
+    json_list = []
+    json_text = ''
+    block = False
+    for i in range(0, len(text)):
+        if block and text[i] != ",":
+            block = False
+        if not block:
+            if text[i] == '{' or text[i] == '(' or text[i] == '[':
+                stack.push(text[i])
+            if text[i] == '}' or text[i] == ')' or text[i] == ']':
+                if not(stack.compare_brackets(text[i])):
+                    return False
+            json_text += text[i]
+            if stack.is_empty():         
+                json_obj = json.loads(json_text)
+
+                if len(list(json_obj.keys())) > 1:
+                    json_list.append(json_obj)         
+                json_text = ''
+                block = True
+
+    return json_list
 
 if __name__ == "__main__":
     text =  recognize_speech('myspeech.wav', duration=6)
-    print(text)

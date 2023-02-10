@@ -1,6 +1,7 @@
 // import logo from './logo.svg';
 import React from 'react';
 import './App.css';
+import './components/styles.css';
 import { useState, useEffect } from 'react';
 import Main from './pages/main/main'
 import { ThemeProvider } from '@emotion/react';
@@ -38,6 +39,7 @@ class App extends React.Component {
   }
 
   assignState = (data) => {
+    console.log(data)
     const newDataConfig = {
       displayText: data.message['data']['displayText'],
       kanjiText: data.message['data']['kanjiText'],
@@ -56,33 +58,22 @@ class App extends React.Component {
       data: newDataConfig
     }
     this.setState({config: newConfig })
-  }
-  
-  // handleSave = async () => {
-  //   const audioBlob = await fetch(this.state.blobURL).then((r) => r.blob());
-  //   const audioFile = new File([audioBlob], 'voice.mp3', { type: 'audio/mp3' });
-  //   const formData = new FormData(); // preparing to send to the server
+  };
 
-  //   formData.append('file', audioFile);  // preparing to send to the server
-
-  //   fetch("/audio", {
-  //     method: 'POST',
-  //     mode: 'cors',
-  //     body: formData
-  //   })
-  //   .then(async (res) => {
-  //     const data = await res.json()
-  //     this.state.config = data
-  //     console.log(data);
-  //     if (!res.ok) {
-  //       const err = (data && data.message) || res.status;
-  //       return Promise.reject(err);
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //   });
-  // };
+  getEditedText = (text, error_chars) => {
+    console.log(text)
+    console.log(error_chars)
+    var s = text.split("");
+    var s_new = "";
+    for (var i = 0; i < s.length; i++) {
+        if (error_chars.includes(i)) {
+            var s_new = s_new + "<mark class='error-char'>" + s[i] + "</mark>";
+        } else {
+            var s_new = s_new + s[i];
+        }
+    };
+    return s_new
+  };
 
 
     //API functions
@@ -140,7 +131,11 @@ class App extends React.Component {
     })
     .then(async (res) => {
       const data = await res.json();
+      var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
+      console.log(edited_text);
+      data.message['data']['displayText'] = edited_text;
       this.assignState(data)
+      // console.log(this.state.config)
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -182,23 +177,22 @@ class App extends React.Component {
       console.log(this.state.config)
     };
 
-    switch = () => {
-      if (this.state.config['data']['displayType'] == 'romaji') {
-          const data = {'message': this.state.config}
-          data.message['data']['displayText'] = this.state.config['data']['kanjiText']
-          data.message['data']['displayType'] = 'kanji'
+  switch = () => {
+    if (this.state.config['data']['displayType'] == 'romaji') {
+      const data = {'message': this.state.config}
+      data.message['data']['displayText'] = this.getEditedText(this.state.config['data']['kanjiText'], this.state.config['data']['error']['errorChars'])
+      data.message['data']['displayType'] = 'kanji'
+      this.assignState(data)             
+    } else {
+      fetch("/switch", {
+          method: 'POST',
+          mode: 'cors',
+          body: JSON.stringify(this.state.config)
+      }).then(async (res) => {
+          const data = await res.json()
           this.assignState(data)
-              
-      } else {
-          fetch("/switch", {
-              method: 'POST',
-              mode: 'cors',
-              body: JSON.stringify(this.state.config)
-          }).then(async (res) => {
-              const data = await res.json()
-              this.assignState(data)
-          });
-      }
+      });
+    }
   };
 
   componentDidMount() {

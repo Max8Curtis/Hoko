@@ -24,10 +24,14 @@ class Data:
     def update(self, display_text, kanji_text, display_type, error):
         display_error = list(error.values())[0]
         error_chars = list(error.values())[1]
-        self.display_text = display_text
-        self.kanji_text = kanji_text
-        self.display_type = display_type
-        self.error.update(display_error, error_chars)
+        if not(display_text == None and kanji_text == None and display_type == None):      
+            self.display_text = display_text
+            self.kanji_text = kanji_text
+            self.display_type = display_type
+            self.error.update(display_error, error_chars)
+        else:
+            self.error.update(display_error, error_chars)
+
 
     def to_json(self):
         return {
@@ -232,9 +236,6 @@ class Game:
             elif curr_char_dir == 270 and curr_char_col >= 1:
                 new_row = curr_char_row
                 new_col = curr_char_col-1
-            
-            # print(new_row)
-            # print(new_col)
 
             # Check that move is within map boundary            
             if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
@@ -267,6 +268,12 @@ class Game:
         }
 
 class GameFactory:
+
+    ###
+    #   Could implement a 'move counter' for knowing when at_game_start is true, increment/decrement so check == 0?
+    #
+    ###
+
     def __init__(self):
         self.game_exists = False
 
@@ -276,25 +283,18 @@ class GameFactory:
         self.game_exists = True
         self.game_state_count = 0
         self.game.update_game_start(True)
-        print(self.game_states)
 
     # Saves the current game state so that it can be reverted to
     def save_game_state(self):
         self.game_states.append(self.game.to_json())
-        print("SAVING GAME STATE")
-        print(self.game_states)
         self.game_state_count += 1
         if self.game_state_count > 1:
             self.game.update_game_start(False)
 
     # Loads the previous game state into the Game object to 'undo' a move, then removes state from the list
     def load_previous_config(self):
-        
         self.game.load_config(self.game_states[self.game_state_count-2])
-        # print(f"New state: {self.game_states[self.game_state_count-2]}")
         last_state = self.game_states.pop()
-        # print("GAME STATES:")
-        print(self.game_states)
         self.game_state_count -= 1
         if self.game_state_count == 1:
             self.game.update_game_start(True)
@@ -303,7 +303,6 @@ class GameFactory:
         self.game.reset_game()
         self.game_state_count = 1
         self.game_states = [self.game_states[0]]
-        print(self.game_states)
 
 # gameFac = GameFactory()
 # gameFac.new_game()
