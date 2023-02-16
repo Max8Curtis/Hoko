@@ -17,3 +17,8 @@ Start Web-app:
 ## API Connection
 
 Include a .env file in top level, containing a wit.ai access token.
+
+## Train move-extraction NLP model
+
+1. Load dataset csv `direction_phrases_dataset.csv` into `/speech/data`
+2. `python speech/retrain_model.py`

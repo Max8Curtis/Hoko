@@ -17,7 +17,6 @@ from speech import recorder
 from speech import structure
 
 nlp = spacy.load(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'model'))
-print(convert_text.predict(nlp, '100メートル行ってください'))
 
 app = Flask("AppAPI")
 api = Api(app)
@@ -26,13 +25,9 @@ parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 
 gameFactory = game_structs.GameFactory()
-# gameFactory.new_game()
-# gameFactory.save_game_state()
-# print("Default game:")
-# print(gameFactory.game.to_json())
-# print(f"Char location: {gameFactory.game.get_character().get_row()} {gameFactory.game.get_character().get_col()} {gameFactory.game.get_character().get_direction()}")
 
 class API:
+        
     ## Test endpoint
     @app.route('/data')
     def return_data():
@@ -52,26 +47,25 @@ class API:
             'message': config
         }
 
-    @app.route('/move', methods=['POST'])
-    def move_char():
-        data = json.loads(request.data)
-        text = data['msgData']['kanjiText']
-        # print(text)
-        move = convert_text.convert(text)
-        # print(move)
-        new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
-        # print(f"Validity of this move is {valid_move}")
-        # print(f"New character position:")
-        # print(f"Row: {new_row}, Col: {new_col}, Direction: {new_dir}")
-        config = gameFactory.game.to_json()
-        # print(config)
-        return {
-            'message': config
-        }
+    # @app.route('/move', methods=['POST'])
+    # def move_char():
+    #     data = json.loads(request.data)
+    #     text = data['msgData']['kanjiText']
+    #     # print(text)
+    #     move = convert_text.convert(text)
+    #     # print(move)
+    #     new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
+    #     # print(f"Validity of this move is {valid_move}")
+    #     # print(f"New character position:")
+    #     # print(f"Row: {new_row}, Col: {new_col}, Direction: {new_dir}")
+    #     config = gameFactory.game.to_json()
+    #     # print(config)
+    #     return {
+    #         'message': config
+    #     }
 
     @app.route('/reset')
     def reset_game():
-
         gameFactory.reset_game()
         config = gameFactory.game.to_json()
         return {
@@ -105,7 +99,7 @@ class API:
             config = gameFactory.game.to_json()
             print(config)
             return {
-            'message': config
+                'message': config
             } 
 
         ##### TESTING
@@ -113,17 +107,19 @@ class API:
         #####
 
         error_chars = []
-        move = convert_text.predict(nlp, text)
-        new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
+
+        # Predict move for each phrase in the text, then apply move sequentially
+        phrases = convert_text.split_text(nlp, text)
+        print(phrases)
+        moves = convert_text.predict(nlp, phrases)
+        print(moves)
+        new_row, new_col, new_dir, valid_move = gameFactory.game.make_moves(moves)
 
         if valid_move:  
             # Convert text to display_type
             display_type = gameFactory.game.get_display_type()
             if display_type == 'romaji':
                 display_text = structure.kanji_to_romaji(text)
-
-                # Obtain list of characters where confidence is below the threshold
-                # error_chars = structure.romaji_eval_errors(json_list, 0.2)
             else:
                 display_text = text
 
@@ -161,19 +157,11 @@ class API:
 
     @app.route('/undo')
     def retrieve_previous():
-
-        # TODO: ADD FUNCTIONALITY TO DISABLE UNDO BUTTON IF ALREADY AT START OF GAME
-
         gameFactory.load_previous_config()
         config = gameFactory.game.to_json()
         return {
             'message': config
         }
-
-
-
-
-
 
 if __name__ == "__main__":
     app.run()
