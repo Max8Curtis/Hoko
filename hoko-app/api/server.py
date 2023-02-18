@@ -8,7 +8,6 @@ import os
 import sys
 from pathlib import Path
 path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
-print(path)
 sys.path.insert(0, path)
 
 from speech import game_structs
@@ -47,23 +46,6 @@ class API:
             'message': config
         }
 
-    # @app.route('/move', methods=['POST'])
-    # def move_char():
-    #     data = json.loads(request.data)
-    #     text = data['msgData']['kanjiText']
-    #     # print(text)
-    #     move = convert_text.convert(text)
-    #     # print(move)
-    #     new_row, new_col, new_dir, valid_move = gameFactory.game.make_move(move)
-    #     # print(f"Validity of this move is {valid_move}")
-    #     # print(f"New character position:")
-    #     # print(f"Row: {new_row}, Col: {new_col}, Direction: {new_dir}")
-    #     config = gameFactory.game.to_json()
-    #     # print(config)
-    #     return {
-    #         'message': config
-    #     }
-
     @app.route('/reset')
     def reset_game():
         gameFactory.reset_game()
@@ -74,24 +56,12 @@ class API:
 
     @app.route('/audio', methods=['POST'])
     def get_audio():
-        # data = json.loads(request.data)
-        # print(data)
-        # print(request.headers)
-        # s = request.get_data(parse_form_data=True)
-        # print(request.get_data(parse_form_data=True))
-        # print(s.decode('utf-16'))
-        # print(s[0:10])
-        # print(request.files['file'])
+        audio_location = os.path.join(path, "speech", request.files['file'].filename)
+        request.files['file'].save(audio_location)
 
-        # print(request.form)
-        # print(request.form.get('file'))
-        # content = request.files['file']
-        # print(content)
-        # print(content.read().decode('utf-16-be'))
-        # with open("audio.txt", "wb") as file: 
-        #     file.write(content.read())
-        # file = request.form.get('file')
-        text, json_list = recorder.recognize_speech(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'myspeech1.wav'), 6, structure.Stack())
+        text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
+        print(text)
+        # os.remove(audio_location)
 
         # Display error message if no audio detected
         if text == "":

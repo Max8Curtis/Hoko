@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import requests
 import json
+import librosa
 
 load_dotenv()
 
@@ -49,9 +50,9 @@ def read_audio(filename):
     return audio
 
 def recognize_speech(audiofile, duration, stack):
-    
+    print(librosa.get_duration(filename=audiofile))
     # record_audio(duration, audiofile)
-    
+    print(audiofile)
     audio = read_audio(audiofile)
     
     headers = {'authorization': 'Bearer ' + os.getenv("WIT_ACCESS_TOKEN"),
@@ -60,7 +61,7 @@ def recognize_speech(audiofile, duration, stack):
     resp = requests.post(os.getenv("API_ENDPOINT")+os.getenv("API_FUNCTION_SPEECH"), headers = headers,
                          data = audio)
     data = resp.content.decode("utf-8")
-
+    print(data)
     ###
     # Clean up reponse data
     data = data.replace("\r", ",")
@@ -76,7 +77,7 @@ def recognize_speech(audiofile, duration, stack):
         text = ""
     #
     ###
-
+    print(text)
     return text, json_list
 
 def decode_json(stack, text):
@@ -104,4 +105,4 @@ def decode_json(stack, text):
     return json_list
 
 if __name__ == "__main__":
-    text =  recognize_speech('myspeech.wav', duration=6)
+    text =  recognize_speech('voice.wav', duration=6)
