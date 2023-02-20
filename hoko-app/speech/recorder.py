@@ -50,13 +50,13 @@ def read_audio(filename):
     return audio
 
 def recognize_speech(audiofile, duration, stack):
-    print(librosa.get_duration(filename=audiofile))
+    # print(librosa.get_duration(filename=audiofile))
     # record_audio(duration, audiofile)
     print(audiofile)
     audio = read_audio(audiofile)
     
     headers = {'authorization': 'Bearer ' + os.getenv("WIT_ACCESS_TOKEN"),
-               'Content-Type': 'audio/wav'}
+               'Content-Type': 'audio/mpeg3'}
 
     resp = requests.post(os.getenv("API_ENDPOINT")+os.getenv("API_FUNCTION_SPEECH"), headers = headers,
                          data = audio)

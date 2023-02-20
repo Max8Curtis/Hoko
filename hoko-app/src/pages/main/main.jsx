@@ -40,51 +40,7 @@ import Shrine from '../../assets/map/shrine.png'
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame}) {
-
-
-    // TODO: Move all movement functions to App.js so they can be called once move is returned from /audio
-
-    // const [audio, setAudio] = useState({
-    //     audioDetails: {
-    //         url: null,
-    //         blob: null,
-    //         chunks: null,
-    //         duration: {
-    //             h: 0,
-    //             m: 0,
-    //             s: 0
-    //         }
-    //     }
-    // });
-
-    // function handleAudioStop(data) {
-    //     console.log(data)
-    //     setAudio({ audioDetails: data });
-    // }
-
-    // function handleAudioUpload(file) {
-    //     console.log(file);
-    // }
-
-    // function handleCountDown(data) {
-    //     console.log(data);
-    // }
-
-    // function handleReset() {
-    //     const reset = {
-    //         url: null,
-    //         blob: null,
-    //         chunks: null,
-    //         duration: {
-    //             h: 0,
-    //             m: 0,
-    //             s: 0
-    //         }
-    //     };
-    //     setAudio({ audioDetails: reset });
-    // }
-
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, processing, winPopup}) {
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
@@ -146,178 +102,23 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     //Structs
     const errorMsg = 'Your voice was unrecognizable, please repeat.';
     const speakingTooltip = 'Speak to move character';
-    const stopTooltip = 'Stop recording speech';
-    // const [speak, setspeak] = useState({
-    //     speaking: false,
-    //     image: micImage,
-    //     func: getSpeech,
-    //     tooltip: speakingTooltip
-    // });
-
-    const [gameConfig, setgameConfig] = useState({
-        config: config
-        // config: {
-        //     target: "",
-        //     map: "",
-        //     char_row: 5,
-        //     char_col: 4,
-        //     char_dir: 0,
-        //     game_won: false
-        // }
-    });
-
-    
-
-    // const [data, setdata] = useState({
-    //     msgData: {
-    //         id: "",
-    //         displayText: "",
-    //         kanjiText: "",
-    //         displayType: "kanji",
-    //         error: {
-    //             displayError: false,
-    //             errorChars: []
-    //         }
-    //     }
-    // });
+    const stopTooltip = 'Stop recording speech';    
 
     const [isHelpOpen, setisHelpOpen] = useState(false);
     const [isWinOpen, setisWinOpen] = useState(config['game_won']);
-
+    const [isProcessingOpen, setisProcessingOpen] = useState(processing);
 
     function toggleHelpPopup() {
+        console.log(isWinOpen)
         setisHelpOpen(!isHelpOpen);
     }
 
-    function toggleWinPopup() {
-        console.log(isWinOpen)
-        setisWinOpen(!isWinOpen)
+
+
+    function toggleProcessingPopup() {
+        // console.log(isWinOpen)
+        setisProcessingOpen(!isProcessingOpen);
     }
-
-
-
-    // function fetchData() {
-    //     fetch("/data").then((res) =>
-    //         res.json().then((data) => {
-    //             setdata({
-    //                 msgData: data.message
-    //             });
-    //         })
-    //     );
-    // };
-
-    
-
-    // function stopSpeaking() {
-    //     //pass
-    //     setspeak({
-    //         speaking: false,
-    //         image: micImage,
-    //         func: getSpeech,
-    //         tooltip: speakingTooltip
-    //     })
-    // }
-
-    // function getSpeech() {
-    //     fetch("/speak").then((res) =>
-    //         res.json().then((data) => {
-    //             setdata({
-    //                 msgData: data.message
-    //             });
-    //         })
-    //     );
-    //     setspeak({
-    //         speaking: true,
-    //         image: stopImage,
-    //         func: stopSpeaking,
-    //         tooltip: stopTooltip
-    //     })
-    // }
-
-    // function undoMove() {
-    //     fetch("/undo").then((res) =>
-    //         res.json().then((data) => {
-    //             setdata({
-    //                 msgData: data.message
-    //             });
-    //         })
-    //     );
-    // }
-
-    // function turnCharLeft() {
-    //     setdata({
-    //         msgData: {
-    //             id: data.msgData['id'],
-    //             displayText: "左に曲がります",
-    //             kanjiText: "左に曲がります",
-    //             displayType: 'romaji',
-    //             error: {
-    //                 displayError: data.msgData.error['displayError'],
-    //                 errorChars: data.msgData.error['errorChars']
-    //             }
-    //         }
-    //     });
-        
-        // callMove()
-        // console.log(gameConfig)
-        // console.log(isWinOpen)
-    // }
-
-    // function moveCharForward() {
-        // setdata({
-        //     msgData: {
-        //         id: data.msgData['id'],
-        //         displayText: "まっすぐ行って",
-        //         kanjiText: "まっすぐ行って",
-        //         displayType: 'romaji',
-        //         error: {
-        //             displayError: data.msgData.error['displayError'],
-        //             errorChars: data.msgData.error['errorChars']
-        //         }
-        //     }
-        // });
-        
-        // callMove()
-        // console.log(gameConfig)
-        // console.log(isWinOpen)
-    // }
-
-
-    // function turnCharRight() {
-    //     console.log(config)
-    //     // console.log(gameConfig)
-    //     setdata({
-    //         msgData: {
-    //             id: data.msgData['id'],
-    //             displayText: "右に曲がります",
-    //             kanjiText: "右に曲がります",
-    //             displayType: 'romaji',
-    //             error: {
-    //                 displayError: data.msgData.error['displayError'],
-    //                 errorChars: data.msgData.error['errorChars']
-    //             }
-    //         }
-    //     });
-        
-    //     callMove()
-        // console.log(gameConfig)
-        // console.log(isWinOpen)
-    // }
-
-    // function callMove() {
-    //     fetch("/move", {
-    //         method: 'POST',
-    //         mode: 'cors',
-    //         body: JSON.stringify(data)
-    //     }).then((res) =>
-    //         res.json().then((gameConfig) => {
-    //             setgameConfig({
-    //                 config: gameConfig.message
-    //             });
-    //         })
-    //     );
-    //     setisWinOpen(gameConfig.config['game_won'])
-    // }
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -410,16 +211,31 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                             handleClose={toggleHelpPopup}
                                         />
                                         }
-                                        {isWinOpen && <Popup
+                                        {config['game_won'] && <Popup
                                             content={
                                                 <>
                                                     <div style={{textAlign: 'center'}}>
                                                         <h1>Congratulations!</h1>
                                                         <h3>You have successfully navigated to the correct target!</h3>
+                                                        <h3>ありがとうございます！</h3>
+                                                        <h3></h3>
+                                                        <h4>Close this window to start a new game.</h4>
                                                     </div>
                                                 </>
                                             }
-                                            handleClose={toggleWinPopup}
+                                            handleClose={winPopup}
+                                        />
+                                        }
+                                        {processing && <Popup
+                                            content={
+                                                <>
+                                                    <div style={{textAlign: 'center'}}>
+                                                        <h1>Your speech is being processed</h1>
+                                                        <h3>ちょっと待ってください</h3>
+                                                    </div>
+                                                </>
+                                            }
+                                            handleClose={toggleProcessingPopup}
                                         />
                                         }
                                     </Grid>

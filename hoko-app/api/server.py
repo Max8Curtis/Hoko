@@ -15,6 +15,8 @@ from speech import convert_text
 from speech import recorder
 from speech import structure
 
+print("Server starting...")
+
 nlp = spacy.load(os.path.join(Path(__file__).parent.absolute().parent.absolute(), 'speech', 'model'))
 
 app = Flask("AppAPI")
@@ -58,6 +60,7 @@ class API:
     def get_audio():
         audio_location = os.path.join(path, "speech", request.files['file'].filename)
         request.files['file'].save(audio_location)
+        myspeechlocation = os.path.join(path, "speech", "voice.mp3")
 
         text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
         print(text)

@@ -16,6 +16,7 @@ class App extends React.Component {
     this.state = {
       isRecording: false,
       blobURL: '',
+      isProcessing: false,
       isBlocked: false,
       config: {
           target: "",
@@ -37,6 +38,10 @@ class App extends React.Component {
       }
     };
   }
+
+  toggleWinPopup = () => {
+    this.startGame()
+  };
 
   assignState = (data) => {
     console.log(data)
@@ -60,6 +65,7 @@ class App extends React.Component {
     this.setState({config: newConfig })
   };
 
+  // This function adds styling to highlight errored characters in the user's speech
   getEditedText = (text, error_chars) => {
     console.log(text)
     console.log(error_chars)
@@ -76,8 +82,9 @@ class App extends React.Component {
   };
 
 
-    //API functions
-  //Can upgrade to a POST, sending number of targets to choose from
+  /**
+   * Get start config for game
+   */
   startGame = () => {
       fetch('/start').then(async (res) => {
           const data = await res.json();
@@ -90,6 +97,9 @@ class App extends React.Component {
       
   }
 
+  /**
+   * Start recording user speech
+   */
   start = () => {
     if (this.state.isBlocked) {
       console.log('Permission Denied');
@@ -102,40 +112,24 @@ class App extends React.Component {
     }
   };
 
-  stop = async () => {
-    Mp3Recorder
-      .stop()
-      .getMp3()
-      .then(([buffer, blob]) => {
-        const blobURL = URL.createObjectURL(blob)
-        this.setState({ blobURL, isRecording: false });
-      }).catch((e) => console.log(e));
-
-      // handleSave();
-    
-    const audioBlob = await fetch(this.state.blobURL).then((r) => r.blob());
-    const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
-    const formData = new FormData(); // preparing to send to the server
-    formData.append('file', audioFile);  // preparing to send to the server
-    
-    // console.log(formData)
-    // console.log(formData.get('file'))
-    for (var [key, value] of formData.entries()) { 
-      console.log(key, value);
-    }
-    
+  /**
+   * Send audio file as form to API endpoint
+   */
+  sendAudio = (form) => {
     fetch("/audio", {
       method: 'POST',
       mode: 'cors',
-      body: formData
+      body: form
     })
     .then(async (res) => {
+      console.log("HI")
       const data = await res.json();
+      console.log("BYE")
+      this.state.isProcessing = false;
       var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
       console.log(edited_text);
       data.message['data']['displayText'] = edited_text;
       this.assignState(data)
-      // console.log(this.state.config)
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -144,6 +138,56 @@ class App extends React.Component {
     .catch((err) => {
       console.log(err);
     });
+  }
+
+  /**
+   * Stop recording user speech
+   */
+  stop = async () => {
+    Mp3Recorder
+      .stop()
+      .getMp3()
+      .then(([buffer, blob]) => {
+        this.state.isProcessing = true;
+        const file = new File(buffer, 'voice.mp3', {
+          type: blob.type,
+          lastModified: Date.now()
+        });
+        const formData = new FormData(); // preparing to send to the server
+        formData.append('file', file);  // preparing to send to the server
+        const blobURL = URL.createObjectURL(blob)
+        this.setState({ blobURL, isRecording: false });
+        this.sendAudio(formData)
+        
+      }).catch((e) => console.log(e));
+    
+    /**
+     * Turn audio blob into form to be sent in request body
+     */
+    // const audioBlob = await fetch(this.state.blobURL).then((r) => r.blob());
+    // const audioFile = new File([audioBlob], 'voice.mp3', { type: 'audio/mp3' });
+    // const formData = new FormData(); // preparing to send to the server
+    // formData.append('file', file);  // preparing to send to the server
+
+    // fetch("/audio", {
+    //   method: 'POST',
+    //   mode: 'cors',
+    //   body: formData
+    // })
+    // .then(async (res) => {
+    //   const data = await res.json();
+    //   var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
+    //   console.log(edited_text);
+    //   data.message['data']['displayText'] = edited_text;
+    //   this.assignState(data)
+    //   if (!res.ok) {
+    //     const err = (data && data.message) || res.status;
+    //     return Promise.reject(err);
+    //   }
+    // })
+    // .catch((err) => {
+    //   console.log(err);
+    // });
   };
 
   resetGame = () => {
@@ -211,7 +255,7 @@ class App extends React.Component {
   render(){
     return (
       <>
-        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} />
+        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} />
       </>
     );
   }
