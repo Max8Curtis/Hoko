@@ -145,6 +145,7 @@ class Game:
         self.char = Character(self.char_start_row, self.char_start_col, 0)
         # self.error = Error()
         self.data = Data("", "", 'kanji')
+        self.move_count = 0
 
     def place_character(self):
         map_data = self.map.get_map()['layout']
@@ -203,6 +204,29 @@ class Game:
         self.char.set_location(config['char_row'], config['char_col'])
         self.char.set_rotation(config['char_dir'])
         self.data.update(config['data']['displayText'], config['data']['kanjiText'], config['data']['displayType'], config['data']['error'])
+
+    def make_moves(self, moves):
+        moves_info = []
+
+        # Get position before any moves applied so moves can be rolled back if invalid
+        curr_char_row = self.char.get_row()
+        curr_char_col = self.char.get_col()
+        curr_char_dir = self.char.get_direction() 
+
+        # Apply each move
+        for move in moves:
+            move_info = []
+            new_row, new_col, new_dir, valid_move = self.make_move(move)
+
+            # If most recent move is invalid, rollback char position and return False
+            if not valid_move:
+                self.char.set_location(curr_char_row, curr_char_col)
+                self.char.set_rotation(curr_char_dir)
+                return self.char.get_row(), self.char.get_col(), self.char.get_direction(), False
+            else:
+                self.char.set_location(new_row, new_col)
+                self.char.set_rotation(new_dir)
+        return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
     # Performs move if valid
     def make_move(self, move):

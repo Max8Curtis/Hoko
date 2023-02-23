@@ -13,10 +13,10 @@ import Popup from '../../components/popup'
 import PopupImage from '../../components/popup-image'
 
 import resetImage from '../../assets/restart_icon.png'
-import micImage from '../../assets/mic_icon.png'
+import micImage from '../../assets/mic.png'
 import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
-import stopImage from '../../assets/stop_icon.png'
+import stopImage from '../../assets/mic_stop.png'
 import mapImage from '../../assets/map/map_1.png'
 import charImage from '../../assets/map/character_1.png'
 import startImage from '../../assets/start_icon.png'
@@ -40,51 +40,7 @@ import Shrine from '../../assets/map/shrine.png'
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame}) {
-
-
-    // TODO: Move all movement functions to App.js so they can be called once move is returned from /audio
-
-    // const [audio, setAudio] = useState({
-    //     audioDetails: {
-    //         url: null,
-    //         blob: null,
-    //         chunks: null,
-    //         duration: {
-    //             h: 0,
-    //             m: 0,
-    //             s: 0
-    //         }
-    //     }
-    // });
-
-    // function handleAudioStop(data) {
-    //     console.log(data)
-    //     setAudio({ audioDetails: data });
-    // }
-
-    // function handleAudioUpload(file) {
-    //     console.log(file);
-    // }
-
-    // function handleCountDown(data) {
-    //     console.log(data);
-    // }
-
-    // function handleReset() {
-    //     const reset = {
-    //         url: null,
-    //         blob: null,
-    //         chunks: null,
-    //         duration: {
-    //             h: 0,
-    //             m: 0,
-    //             s: 0
-    //         }
-    //     };
-    //     setAudio({ audioDetails: reset });
-    // }
-
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup}) {
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
@@ -146,178 +102,24 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     //Structs
     const errorMsg = 'Your voice was unrecognizable, please repeat.';
     const speakingTooltip = 'Speak to move character';
-    const stopTooltip = 'Stop recording speech';
-    // const [speak, setspeak] = useState({
-    //     speaking: false,
-    //     image: micImage,
-    //     func: getSpeech,
-    //     tooltip: speakingTooltip
-    // });
-
-    const [gameConfig, setgameConfig] = useState({
-        config: config
-        // config: {
-        //     target: "",
-        //     map: "",
-        //     char_row: 5,
-        //     char_col: 4,
-        //     char_dir: 0,
-        //     game_won: false
-        // }
-    });
-
-    
-
-    // const [data, setdata] = useState({
-    //     msgData: {
-    //         id: "",
-    //         displayText: "",
-    //         kanjiText: "",
-    //         displayType: "kanji",
-    //         error: {
-    //             displayError: false,
-    //             errorChars: []
-    //         }
-    //     }
-    // });
+    const stopTooltip = 'Stop recording speech';    
 
     const [isHelpOpen, setisHelpOpen] = useState(false);
     const [isWinOpen, setisWinOpen] = useState(config['game_won']);
-
+    const [isProcessingOpen, setisProcessingOpen] = useState(processing);
 
     function toggleHelpPopup() {
+        console.log(config)
+        console.log(isWinOpen)
         setisHelpOpen(!isHelpOpen);
     }
 
-    function toggleWinPopup() {
-        console.log(isWinOpen)
-        setisWinOpen(!isWinOpen)
+
+
+    function toggleProcessingPopup() {
+        // console.log(isWinOpen)
+        setisProcessingOpen(!isProcessingOpen);
     }
-
-
-
-    // function fetchData() {
-    //     fetch("/data").then((res) =>
-    //         res.json().then((data) => {
-    //             setdata({
-    //                 msgData: data.message
-    //             });
-    //         })
-    //     );
-    // };
-
-    
-
-    // function stopSpeaking() {
-    //     //pass
-    //     setspeak({
-    //         speaking: false,
-    //         image: micImage,
-    //         func: getSpeech,
-    //         tooltip: speakingTooltip
-    //     })
-    // }
-
-    // function getSpeech() {
-    //     fetch("/speak").then((res) =>
-    //         res.json().then((data) => {
-    //             setdata({
-    //                 msgData: data.message
-    //             });
-    //         })
-    //     );
-    //     setspeak({
-    //         speaking: true,
-    //         image: stopImage,
-    //         func: stopSpeaking,
-    //         tooltip: stopTooltip
-    //     })
-    // }
-
-    // function undoMove() {
-    //     fetch("/undo").then((res) =>
-    //         res.json().then((data) => {
-    //             setdata({
-    //                 msgData: data.message
-    //             });
-    //         })
-    //     );
-    // }
-
-    // function turnCharLeft() {
-    //     setdata({
-    //         msgData: {
-    //             id: data.msgData['id'],
-    //             displayText: "左に曲がります",
-    //             kanjiText: "左に曲がります",
-    //             displayType: 'romaji',
-    //             error: {
-    //                 displayError: data.msgData.error['displayError'],
-    //                 errorChars: data.msgData.error['errorChars']
-    //             }
-    //         }
-    //     });
-        
-        // callMove()
-        // console.log(gameConfig)
-        // console.log(isWinOpen)
-    // }
-
-    // function moveCharForward() {
-        // setdata({
-        //     msgData: {
-        //         id: data.msgData['id'],
-        //         displayText: "まっすぐ行って",
-        //         kanjiText: "まっすぐ行って",
-        //         displayType: 'romaji',
-        //         error: {
-        //             displayError: data.msgData.error['displayError'],
-        //             errorChars: data.msgData.error['errorChars']
-        //         }
-        //     }
-        // });
-        
-        // callMove()
-        // console.log(gameConfig)
-        // console.log(isWinOpen)
-    // }
-
-
-    // function turnCharRight() {
-    //     console.log(config)
-    //     // console.log(gameConfig)
-    //     setdata({
-    //         msgData: {
-    //             id: data.msgData['id'],
-    //             displayText: "右に曲がります",
-    //             kanjiText: "右に曲がります",
-    //             displayType: 'romaji',
-    //             error: {
-    //                 displayError: data.msgData.error['displayError'],
-    //                 errorChars: data.msgData.error['errorChars']
-    //             }
-    //         }
-    //     });
-        
-    //     callMove()
-        // console.log(gameConfig)
-        // console.log(isWinOpen)
-    // }
-
-    // function callMove() {
-    //     fetch("/move", {
-    //         method: 'POST',
-    //         mode: 'cors',
-    //         body: JSON.stringify(data)
-    //     }).then((res) =>
-    //         res.json().then((gameConfig) => {
-    //             setgameConfig({
-    //                 config: gameConfig.message
-    //             });
-    //         })
-    //     );
-    //     setisWinOpen(gameConfig.config['game_won'])
-    // }
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -336,23 +138,23 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={reset} disabled={config['at_game_start']} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Reset to start'} handleClick={reset} disabled={!gameStarted || config['at_game_start']} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undo} disabled={config['at_game_start']} />
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Undo previous move'} handleClick={undo} disabled={!gameStarted || config['at_game_start']} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
                                         {recording &&
-                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={stop} />
+                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={stop} disabled={!gameStarted} />
                                         }
                                         {!recording &&
-                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={start} />
+                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={start} disabled={!gameStarted} />
                                         }
                                         {/* <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} /> */}
                                         <h2 className='button-label'>
@@ -365,7 +167,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={toggleHelpPopup} />  
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'How to play'} handleClick={toggleHelpPopup} />  
                                         <h2 className='button-label'>Help</h2>
                                         {isHelpOpen && <Popup
                                             content={
@@ -410,16 +212,31 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                             handleClose={toggleHelpPopup}
                                         />
                                         }
-                                        {isWinOpen && <Popup
+                                        {config['game_won'] && <Popup
                                             content={
                                                 <>
                                                     <div style={{textAlign: 'center'}}>
                                                         <h1>Congratulations!</h1>
                                                         <h3>You have successfully navigated to the correct target!</h3>
+                                                        <h3>ありがとうございます！</h3>
+                                                        <h3></h3>
+                                                        <h4>Close this window to start a new game.</h4>
                                                     </div>
                                                 </>
                                             }
-                                            handleClose={toggleWinPopup}
+                                            handleClose={winPopup}
+                                        />
+                                        }
+                                        {processing && <Popup
+                                            content={
+                                                <>
+                                                    <div style={{textAlign: 'center'}}>
+                                                        <h1>Your speech is being processed</h1>
+                                                        <h3>ちょっと待ってください</h3>
+                                                    </div>
+                                                </>
+                                            }
+                                            handleClose={toggleProcessingPopup}
                                         />
                                         }
                                     </Grid>
@@ -462,7 +279,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame} />
+                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Start new game'} handleClick={startGame} />
                                         <h2 className='button-label'>Start</h2>
                                     </Grid>
                                 </Grid>
@@ -479,7 +296,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                     <p style={{ color: "red" }}>{errorMsg}</p>
                                 }
                             </div>
-                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={Capitalize(config['data']['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={Capitalize(config['data']['displayType'])} imageMult={0.3} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
                         </Grid>
                         <div style={{ height: 50, backgroundColor: '#D2E3DF' }}></div>
                     </Grid>
