@@ -35,13 +35,15 @@ class App extends React.Component {
               errorChars: []
             }
           }
-      }
+      },
+      game_started: false // Set true when `start` button is pressed
     };
   }
 
   toggleWinPopup = () => {
     this.startGame()
   };
+
 
   assignState = (data) => {
     console.log(data)
@@ -89,7 +91,9 @@ class App extends React.Component {
       fetch('/start').then(async (res) => {
           const data = await res.json();
           this.assignState(data)
-          console.log(this.state.config)
+          
+          this.state.game_started = true
+          console.log(this.state)
       })
       .catch((err) => {
           console.log(err);
@@ -255,7 +259,7 @@ class App extends React.Component {
   render(){
     return (
       <>
-        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} />
+        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} />
       </>
     );
   }

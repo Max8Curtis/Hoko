@@ -40,7 +40,7 @@ import Shrine from '../../assets/map/shrine.png'
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, processing, winPopup}) {
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup}) {
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
@@ -138,23 +138,23 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Reset to start'} handleClick={reset} disabled={!config['game_started'] || config['at_game_start']} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Reset to start'} handleClick={reset} disabled={!gameStarted || config['at_game_start']} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Undo previous move'} handleClick={undo} disabled={!config['game_started'] || config['at_game_start']} />
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Undo previous move'} handleClick={undo} disabled={!gameStarted || config['at_game_start']} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
                                         {recording &&
-                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={stop} disabled={!config['game_started']} />
+                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={stop} disabled={!gameStarted} />
                                         }
                                         {!recording &&
-                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={start} disabled={!config['game_started']} />
+                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={start} disabled={!gameStarted} />
                                         }
                                         {/* <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} /> */}
                                         <h2 className='button-label'>
