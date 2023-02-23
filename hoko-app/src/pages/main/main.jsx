@@ -13,10 +13,10 @@ import Popup from '../../components/popup'
 import PopupImage from '../../components/popup-image'
 
 import resetImage from '../../assets/restart_icon.png'
-import micImage from '../../assets/mic_icon.png'
+import micImage from '../../assets/mic.png'
 import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
-import stopImage from '../../assets/stop_icon.png'
+import stopImage from '../../assets/mic_stop.png'
 import mapImage from '../../assets/map/map_1.png'
 import charImage from '../../assets/map/character_1.png'
 import startImage from '../../assets/start_icon.png'
@@ -109,6 +109,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     const [isProcessingOpen, setisProcessingOpen] = useState(processing);
 
     function toggleHelpPopup() {
+        console.log(config)
         console.log(isWinOpen)
         setisHelpOpen(!isHelpOpen);
     }
@@ -137,23 +138,23 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                             <Grid container justifyContent="center" direction="column" spacing={2} alignItems="center">
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Reset to start'} handleClick={reset} disabled={config['at_game_start']} />
+                                        <Button item bid={0} buttonImage={resetImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Reset to start'} handleClick={reset} disabled={!config['game_started'] || config['at_game_start']} />
                                         <h2 className='button-label'>Reset</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" alignItems="center">
-                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Undo previous move'} handleClick={undo} disabled={config['at_game_start']} />
+                                        <Button item bid={1} buttonImage={undoImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Undo previous move'} handleClick={undo} disabled={!config['game_started'] || config['at_game_start']} />
                                         <h2 className='button-label'>Undo</h2>
                                     </Grid>
                                 </Grid>
                                 <Grid item alignItems="center">
                                     <Grid container direction="column" alignItems="center">
                                         {recording &&
-                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={stop} />
+                                            <Button item bid={2} buttonImage={stopImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={stop} disabled={!config['game_started']} />
                                         }
                                         {!recording &&
-                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={start} />
+                                            <Button item bid={2} buttonImage={micImage} buttonWidth={70} buttonHeight={70} imageMult={0.8} tooltipText={'Speak to move character'} handleClick={start} disabled={!config['game_started']} />
                                         }
                                         {/* <Button item bid={2} buttonImage={speak.image} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Speak to move character'} handleClick={turnCharLeft} /> */}
                                         <h2 className='button-label'>
@@ -166,7 +167,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'How to play'} handleClick={toggleHelpPopup} />  
+                                        <Button item bid={4} buttonImage={helpImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'How to play'} handleClick={toggleHelpPopup} />  
                                         <h2 className='button-label'>Help</h2>
                                         {isHelpOpen && <Popup
                                             content={
@@ -278,7 +279,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                 </Grid>
                                 <Grid item>
                                     <Grid container direction="column" justifyContent="space-evenly" alignItems="center">
-                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageWidth={50} tooltipText={'Start new game'} handleClick={startGame} />
+                                        <Button item bid={3} buttonImage={startImage} buttonWidth={70} buttonHeight={70} imageMult={1} tooltipText={'Start new game'} handleClick={startGame} />
                                         <h2 className='button-label'>Start</h2>
                                     </Grid>
                                 </Grid>
@@ -295,7 +296,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                     <p style={{ color: "red" }}>{errorMsg}</p>
                                 }
                             </div>
-                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={Capitalize(config['data']['displayType'])} imageWidth={20} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
+                            <Button item bid={3} buttonImage={resetImage} buttonWidth={90} buttonHeight={25} buttonText={Capitalize(config['data']['displayType'])} imageMult={0.3} tooltipText={'Switch between Japanese scripts'} handleClick={switchText} />
                         </Grid>
                         <div style={{ height: 50, backgroundColor: '#D2E3DF' }}></div>
                     </Grid>
