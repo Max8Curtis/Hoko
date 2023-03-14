@@ -17,7 +17,7 @@ import micImage from '../../assets/mic.png'
 import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
 import stopImage from '../../assets/mic_stop.png'
-import mapImage from '../../assets/map/map_1.png'
+import mapImage from '../../assets/map/map_2.png'
 import charImage from '../../assets/map/character_1.png'
 import startImage from '../../assets/start_icon.png'
 

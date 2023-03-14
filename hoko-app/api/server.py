@@ -30,12 +30,9 @@ gameFactory = game_structs.GameFactory()
 class API:
         
     ## Test endpoint
-    @app.route('/data')
+    @app.route('/')
     def return_data():
-        data = example.get_example_text()
-        return {
-            'message': data
-        }
+        return 'API working'
 
     @app.route('/start')
     def start_game():
@@ -64,7 +61,6 @@ class API:
 
         text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
         print(text)
-        # os.remove(audio_location)
 
         # Display error message if no audio detected
         if text == "":
@@ -74,10 +70,6 @@ class API:
             return {
                 'message': config
             } 
-
-        ##### TESTING
-        # text = '100メートル行ってください'
-        #####
 
         error_chars = []
 
@@ -107,13 +99,6 @@ class API:
             'message': config
         }
 
-    # @app.route('/speak')
-    # def new_speech():
-    #     kanji_text, display_error, error_chars = example.get_user_speech()
-    #     return {
-    #         'message': data
-    #     }
-
     # Switch the script used for displaying text
     @app.route('/switch', methods=['POST'])
     def switch_kanji():
@@ -123,7 +108,6 @@ class API:
 
         gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': data['data']['error']['displayError'], 'error_chars':data['data']['error']['errorChars']})
         config = gameFactory.game.to_json()
-        # print(newMsgData.to_json())
         return {
             'message': config
         }
@@ -137,4 +121,4 @@ class API:
         }
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='localhost', port=5000)
