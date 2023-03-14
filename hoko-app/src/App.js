@@ -90,10 +90,8 @@ class App extends React.Component {
   startGame = () => {
       fetch('/start').then(async (res) => {
           const data = await res.json();
-          this.assignState(data)
-          
+          this.assignState(data)          
           this.state.game_started = true
-          console.log(this.state)
       })
       .catch((err) => {
           console.log(err);
