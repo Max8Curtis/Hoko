@@ -244,7 +244,7 @@ class Game:
         elif move == "turn_right":
             self.char.rotate(90)
             valid_move = True
-        elif move == "reverse":
+        elif move == "behind":
             self.char.rotate(180)
             valid_move = True
         elif move == "forward":
