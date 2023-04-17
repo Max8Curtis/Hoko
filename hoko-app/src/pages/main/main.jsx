@@ -17,7 +17,8 @@ import micImage from '../../assets/mic.png'
 import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
 import stopImage from '../../assets/mic_stop.png'
-import mapImage from '../../assets/map/map_2.png'
+import mapImage1 from '../../assets/map/map_2.png'
+import mapImage2 from '../../assets/map/map_3.png'
 import charImage from '../../assets/map/character_1.png'
 import startImage from '../../assets/start_icon.png'
 
@@ -40,7 +41,7 @@ import Shrine from '../../assets/map/shrine.png'
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup}) {
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup, outOfBounds}) {
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
@@ -48,6 +49,15 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
 
     function Capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    const maps = {
+        "1": {
+            "img": mapImage1
+        },
+        "2": {
+            "img": mapImage2
+        }
     }
 
     // TODO: Change page to get targets struct from API whenever neeeded, instead of storing here
@@ -107,6 +117,7 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     const [isHelpOpen, setisHelpOpen] = useState(false);
     const [isWinOpen, setisWinOpen] = useState(config['game_won']);
     const [isProcessingOpen, setisProcessingOpen] = useState(processing);
+    const [isOutOfBoundsOpen, setisOutOfBoundsOpen] = useState(outOfBounds);
 
     function toggleHelpPopup() {
         console.log(config)
@@ -114,7 +125,9 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
         setisHelpOpen(!isHelpOpen);
     }
 
-
+    function toggleOutOfBoundsPopup() {
+        setisOutOfBoundsOpen(!isOutOfBoundsOpen);
+    }
 
     function toggleProcessingPopup() {
         // console.log(isWinOpen)
@@ -239,12 +252,24 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                             handleClose={toggleProcessingPopup}
                                         />
                                         }
+                                        {isOutOfBoundsOpen && <Popup 
+                                            content={
+                                                <>
+                                                    <div style={{textAlign: 'center'}}>
+                                                        <h1 style={{color: 'red'}}>Out of bounds!</h1>
+                                                        <h3>These directions move the character to an inaccessible location.</h3>
+                                                    </div>
+                                                </>
+                                            }
+                                            handleClose={toggleOutOfBoundsPopup}
+                                        />
+                                        }
                                     </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={7.4}>
-                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charRow={config['char_row']} charCol={config['char_col']} charDir={config['char_dir']} style={{ paddingLeft: 50 }} />
+                            <Map image={maps[config['map']]['img']} character={charImage} width={700} height={mapImageDisplayHeight} charRow={config['char_row']} charCol={config['char_col']} charDir={config['char_dir']} style={{ paddingLeft: 50 }} />
                         </Grid>
                         <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">

@@ -20,12 +20,13 @@ class App extends React.Component {
       isBlocked: false,
       config: {
           target: "",
-          map: "",
+          map: "1",
           char_row: 4,
           char_col: 3,
           char_dir: 0,
           game_won: false,
           at_game_start: true,
+          out_of_bounds: false,
           data: {
             displayText: "",
             kanjiText: "",
@@ -36,9 +37,12 @@ class App extends React.Component {
             }
           }
       },
-      game_started: false // Set true when `start` button is pressed
+      game_started: false, // Set true when `start` button is pressed
+      outOfBounds: false,
     };
+    
   }
+  
 
   toggleWinPopup = () => {
     this.startGame()
@@ -62,6 +66,7 @@ class App extends React.Component {
       char_dir: data.message['char_dir'],
       game_won: data.message['game_won'],
       at_game_start: data.message['at_game_start'],
+      out_of_bounds: data.message['out_of_bounds'],
       data: newDataConfig
     }
     this.setState({config: newConfig })
@@ -124,14 +129,20 @@ class App extends React.Component {
       body: form
     })
     .then(async (res) => {
-      console.log("HI")
       const data = await res.json();
-      console.log("BYE")
       this.state.isProcessing = false;
       var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
       console.log(edited_text);
       data.message['data']['displayText'] = edited_text;
-      this.assignState(data)
+      this.assignState(data);
+      if (data.message['out_of_bounds'] == true) {
+        this.state.outOfBounds = true
+      } else {
+        this.state.outOfBounds = false
+      }
+      console.log(this.state.outOfBounds)
+      // if (this.state.config['out_of_bounds'] == true):
+      //   toggleWinPopup
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -257,7 +268,7 @@ class App extends React.Component {
   render(){
     return (
       <>
-        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} />
+        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} outOfBounds={this.state.outOfBounds} />
       </>
     );
   }

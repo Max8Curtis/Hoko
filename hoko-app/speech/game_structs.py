@@ -67,7 +67,10 @@ class Map:
         self.update_map(chosen_target_row, chosen_target_col, "T")
 
     def choose_map(self):
-        return random.choice(list(self.maps['objects']['maps']))
+        print(list(self.maps['objects']['maps']))
+        map = random.choice(list(self.maps['objects']['maps']))
+        print(map)
+        return map
 
     def choose_target(self):
         return random.choice(list(self.maps['objects']['maps'][str(self.chosen_map)]['targets']))
@@ -146,6 +149,7 @@ class Game:
         # self.error = Error()
         self.data = Data("", "", 'kanji')
         self.move_count = 0
+        self.out_of_bounds = False
 
     def place_character(self):
         map_data = self.map.get_map()['layout']
@@ -192,6 +196,12 @@ class Game:
     
     def get_errors(self):
         return self.data.erro
+
+    def get_out_of_bounds(self):
+        return self.out_of_bounds
+
+    def set_out_of_bounds(self, val):
+        self.out_of_bounds = val
 
     def valid_move(self, node_at_new_loc):
         valid_move = False
@@ -246,35 +256,73 @@ class Game:
             valid_move = True
         elif move == "behind":
             self.char.rotate(180)
+            row, col, dir, valid_move = self.move_forward(curr_char_row, curr_char_col, curr_char_dir)
             valid_move = True
         elif move == "forward":
-            if curr_char_dir == 0 and curr_char_row >= 1:
-                new_row = curr_char_row-1
-                new_col = curr_char_col              
-            elif curr_char_dir == 90 and curr_char_col <= self.map.get_max_col():
-                new_row = curr_char_row
-                new_col = curr_char_col+1
-            elif curr_char_dir == 180 and curr_char_row <= self.map.get_max_row():
-                new_row = curr_char_row+1
-                new_col = curr_char_col
-            elif curr_char_dir == 270 and curr_char_col >= 1:
-                new_row = curr_char_row
-                new_col = curr_char_col-1
+            # if curr_char_dir == 0 and curr_char_row >= 1:
+            #     new_row = curr_char_row-1
+            #     new_col = curr_char_col              
+            # elif curr_char_dir == 90 and curr_char_col <= self.map.get_max_col():
+            #     new_row = curr_char_row
+            #     new_col = curr_char_col+1
+            # elif curr_char_dir == 180 and curr_char_row <= self.map.get_max_row():
+            #     new_row = curr_char_row+1
+            #     new_col = curr_char_col
+            # elif curr_char_dir == 270 and curr_char_col >= 1:
+            #     new_row = curr_char_row
+            #     new_col = curr_char_col-1
 
-            # Check that move is within map boundary            
-            if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
-                node_at_new_loc = self.map.get_node_at(new_row, new_col)
-                print(node_at_new_loc)
-                valid_move = self.valid_move(node_at_new_loc)
+            # # Check that move is within map boundary            
+            # if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
+            #     node_at_new_loc = self.map.get_node_at(new_row, new_col)
+            #     print(node_at_new_loc)
+            #     valid_move = self.valid_move(node_at_new_loc)
 
-            if valid_move:
-                self.char.set_location(new_row, new_col)
+            # if valid_move:
+            #     self.char.set_location(new_row, new_col)
 
-                # Return current square to original node when character is moved
-                self.map.revert_location_to_node(curr_char_row, curr_char_col)
-                if node_at_new_loc == "T":
-                    # game_winning_move = True
-                    self.game_won = True
+            #     # Return current square to original node when character is moved
+            #     self.map.revert_location_to_node(curr_char_row, curr_char_col)
+            #     if node_at_new_loc == "T":
+            #         # game_winning_move = True
+            #         self.game_won = True
+            # # print(f"Row: {self.char.get_row()}")
+
+            row, col, dir, valid_move = self.move_forward(curr_char_row, curr_char_col, curr_char_dir)
+            if not valid_move:
+                self.set_out_of_bounds(True)
+        return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
+
+    def move_forward(self, curr_char_row, curr_char_col, curr_char_dir):
+        new_row = curr_char_row
+        new_col = curr_char_col
+        if curr_char_dir == 0 and curr_char_row >= 1:
+            new_row = curr_char_row-1
+            new_col = curr_char_col              
+        elif curr_char_dir == 90 and curr_char_col <= self.map.get_max_col():
+            new_row = curr_char_row
+            new_col = curr_char_col+1
+        elif curr_char_dir == 180 and curr_char_row <= self.map.get_max_row():
+            new_row = curr_char_row+1
+            new_col = curr_char_col
+        elif curr_char_dir == 270 and curr_char_col >= 1:
+            new_row = curr_char_row
+            new_col = curr_char_col-1
+
+        # Check that move is within map boundary            
+        if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
+            node_at_new_loc = self.map.get_node_at(new_row, new_col)
+            print(node_at_new_loc)
+            valid_move = self.valid_move(node_at_new_loc)
+
+        if valid_move:
+            self.char.set_location(new_row, new_col)
+
+            # Return current square to original node when character is moved
+            self.map.revert_location_to_node(curr_char_row, curr_char_col)
+            if node_at_new_loc == "T":
+                # game_winning_move = True
+                self.game_won = True
             # print(f"Row: {self.char.get_row()}")
         return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
@@ -288,6 +336,7 @@ class Game:
             'char_dir': self.char.get_direction(),
             'game_won': self.get_game_won(),
             'at_game_start': self.get_game_start(),
+            'out_of_bounds': self.get_out_of_bounds(),
             'data': self.data.to_json()
         }
 
