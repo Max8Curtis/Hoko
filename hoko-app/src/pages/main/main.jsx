@@ -189,10 +189,12 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                                         <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                                                             <h2>How to play</h2>
                                                             <br></br>
-                                                            <p>1. Press Start - a random target will be generated</p>
-                                                            <p>2. Press Speak - speak directions in Japanese to move the character around the map towards the target</p>
+                                                            <p>1. Press <i>Start</i> - a random target and map will be generated</p>
+                                                            <p>2. Press <i>Speak</i> - speak directions in Japanese to move the character around the map towards the target</p>
                                                             <p>     (Saying "go forward" will move the character forward by one square)</p>
-                                                            <p>3. When the character is facing the target, you have completed the game!</p>
+                                                            <p>3. Press <i>Stop</i> - this will stop recording your voice and completes the turn</p>
+                                                            <p></p>
+                                                            <p>When the character is facing the target, you have completed the game!</p>
                                                             <h3>Pronunciation</h3>
                                                             <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
                                                             <p style={{textAlign: 'center'}}>If part of your speech has unclear pronunciation, the relevant characters will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is perfect!</p>

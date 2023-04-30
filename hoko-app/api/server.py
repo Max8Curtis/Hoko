@@ -55,12 +55,12 @@ class API:
 
     @app.route('/audio', methods=['POST'])
     def get_audio():
+        # Get audio file
         audio_location = os.path.join(path, "speech", request.files['file'].filename)
         request.files['file'].save(audio_location)
         myspeechlocation = os.path.join(path, "speech", "voice.mp3")
 
         text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
-        print(text)
 
         # Display error message if no audio detected
         if text == "":
@@ -75,9 +75,7 @@ class API:
 
         # Predict move for each phrase in the text, then apply move sequentially
         phrases = convert_text.split_text(nlp, text)
-        print(phrases)
         moves = convert_text.predict(nlp, phrases)
-        print(moves)
         new_row, new_col, new_dir, valid_move = gameFactory.game.make_moves(moves)
 
         if valid_move:  
@@ -94,7 +92,8 @@ class API:
             gameFactory.game.update_data(display_text, text, display_type, {'display_error': False, 'error_chars': error_chars})
             gameFactory.save_game_state()
         config = gameFactory.game.to_json()
-        print(config)
+
+        # Return updated game configuration
         return {
             'message': config
         }
@@ -103,6 +102,8 @@ class API:
     @app.route('/switch', methods=['POST'])
     def switch_kanji():
         data = json.loads(request.data)
+
+        # Transliterate text if written in pure Japanese
         if data['data']['displayType'] == 'kanji':
             romaji_text = structure.kanji_to_romaji(data['data']['kanjiText'])
 

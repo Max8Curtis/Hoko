@@ -40,7 +40,6 @@ class App extends React.Component {
       game_started: false, // Set true when `start` button is pressed
       outOfBounds: false,
     };
-    
   }
   
 
@@ -72,10 +71,10 @@ class App extends React.Component {
     this.setState({config: newConfig })
   };
 
-  // This function adds styling to highlight errored characters in the user's speech
+  /**
+   * Add styling to highlight errored characters in the user's speech
+   */  
   getEditedText = (text, error_chars) => {
-    console.log(text)
-    console.log(error_chars)
     var s = text.split("");
     var s_new = "";
     for (var i = 0; i < s.length; i++) {
@@ -132,7 +131,6 @@ class App extends React.Component {
       const data = await res.json();
       this.state.isProcessing = false;
       var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
-      console.log(edited_text);
       data.message['data']['displayText'] = edited_text;
       this.assignState(data);
       if (data.message['out_of_bounds'] == true) {
@@ -140,9 +138,7 @@ class App extends React.Component {
       } else {
         this.state.outOfBounds = false
       }
-      console.log(this.state.outOfBounds)
-      // if (this.state.config['out_of_bounds'] == true):
-      //   toggleWinPopup
+
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -171,7 +167,6 @@ class App extends React.Component {
         const blobURL = URL.createObjectURL(blob)
         this.setState({ blobURL, isRecording: false });
         this.sendAudio(formData)
-        
       }).catch((e) => console.log(e));
     
     /**
