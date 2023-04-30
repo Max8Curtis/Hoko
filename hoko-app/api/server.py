@@ -60,6 +60,8 @@ class API:
         request.files['file'].save(audio_location)
         myspeechlocation = os.path.join(path, "speech", "voice.mp3")
 
+        os.remove(myspeechlocation)
+
         text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
 
         # Display error message if no audio detected
