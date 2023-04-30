@@ -89,10 +89,14 @@ class API:
                 # Obtain list of characters where confidence is below the threshold
                 error_chars = structure.eval_errors(json_list, 0.2)
 
-            gameFactory.game.update_data(display_text, text, display_type, {'display_error': False, 'error_chars': error_chars})
-            gameFactory.save_game_state()
-        config = gameFactory.game.to_json()
+        
+            gameFactory.game.update_data(display_text, text, display_type, {'display_error': False, 'error_chars': error_chars, 'invalid_move': False})
+        else:
+            gameFactory.game.update_data(None, None, None, {'display_error': None, 'error_chars': None, 'invalid_move': True})
 
+        gameFactory.save_game_state()
+        config = gameFactory.game.to_json()
+        
         # Return updated game configuration
         return {
             'message': config
@@ -107,7 +111,7 @@ class API:
         if data['data']['displayType'] == 'kanji':
             romaji_text = structure.kanji_to_romaji(data['data']['kanjiText'])
 
-        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': data['data']['error']['displayError'], 'error_chars':data['data']['error']['errorChars']})
+        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': data['data']['error']['displayError'], 'error_chars':data['data']['error']['errorChars'], 'invalid_move':data['data']['error']['invalidMove']})
         config = gameFactory.game.to_json()
         return {
             'message': config

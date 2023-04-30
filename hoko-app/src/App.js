@@ -26,19 +26,19 @@ class App extends React.Component {
           char_dir: 0,
           game_won: false,
           at_game_start: true,
-          out_of_bounds: false,
           data: {
             displayText: "",
             kanjiText: "",
             displayType: "kanji",
             error: {
               displayError: false,
-              errorChars: []
+              errorChars: [],
+              invalidMove: false
             }
           }
       },
+      invalidMove: false,
       game_started: false, // Set true when `start` button is pressed
-      outOfBounds: false,
     };
   }
   
@@ -47,6 +47,10 @@ class App extends React.Component {
     this.startGame()
   };
 
+
+  toggleInvalidMovePopup = () => {
+    this.setState({invalidMove: !this.state.invalidMove})
+  }
 
   assignState = (data) => {
     console.log(data)
@@ -65,9 +69,9 @@ class App extends React.Component {
       char_dir: data.message['char_dir'],
       game_won: data.message['game_won'],
       at_game_start: data.message['at_game_start'],
-      out_of_bounds: data.message['out_of_bounds'],
       data: newDataConfig
     }
+    this.setState({invalidMove: data.message['data']['error']['invalidMove']}, () => console.log(this.state.config['data']['error']['invalidMove']))
     this.setState({config: newConfig })
   };
 
@@ -133,11 +137,7 @@ class App extends React.Component {
       var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
       data.message['data']['displayText'] = edited_text;
       this.assignState(data);
-      if (data.message['out_of_bounds'] == true) {
-        this.state.outOfBounds = true
-      } else {
-        this.state.outOfBounds = false
-      }
+      console.log(this.state.invalidMove);
 
       if (!res.ok) {
         const err = (data && data.message) || res.status;
@@ -168,34 +168,6 @@ class App extends React.Component {
         this.setState({ blobURL, isRecording: false });
         this.sendAudio(formData)
       }).catch((e) => console.log(e));
-    
-    /**
-     * Turn audio blob into form to be sent in request body
-     */
-    // const audioBlob = await fetch(this.state.blobURL).then((r) => r.blob());
-    // const audioFile = new File([audioBlob], 'voice.mp3', { type: 'audio/mp3' });
-    // const formData = new FormData(); // preparing to send to the server
-    // formData.append('file', file);  // preparing to send to the server
-
-    // fetch("/audio", {
-    //   method: 'POST',
-    //   mode: 'cors',
-    //   body: formData
-    // })
-    // .then(async (res) => {
-    //   const data = await res.json();
-    //   var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
-    //   console.log(edited_text);
-    //   data.message['data']['displayText'] = edited_text;
-    //   this.assignState(data)
-    //   if (!res.ok) {
-    //     const err = (data && data.message) || res.status;
-    //     return Promise.reject(err);
-    //   }
-    // })
-    // .catch((err) => {
-    //   console.log(err);
-    // });
   };
 
   resetGame = () => {
@@ -263,7 +235,7 @@ class App extends React.Component {
   render(){
     return (
       <>
-        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} outOfBounds={this.state.outOfBounds} />
+        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} invalidMove={this.state.invalidMove} />
       </>
     );
   }

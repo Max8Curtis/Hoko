@@ -40,8 +40,9 @@ import Shrine from '../../assets/map/shrine.png'
 
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
+import { red } from '@mui/material/colors';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup, outOfBounds}) {
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup, invalidMove}) {
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
@@ -117,22 +118,28 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     const [isHelpOpen, setisHelpOpen] = useState(false);
     const [isWinOpen, setisWinOpen] = useState(config['game_won']);
     const [isProcessingOpen, setisProcessingOpen] = useState(processing);
-    const [isOutOfBoundsOpen, setisOutOfBoundsOpen] = useState(outOfBounds);
+    const [isInvalidMove, setisInvalidMove] = useState(config['data']['error']['invalidMove']);
+    const [isInvalidMovePopupOpen, setisInvalidMovePopupOpen] = useState(isInvalidMove);
+
+    useEffect(() => {
+        setisInvalidMove(config['data']['error']['invalidMove'])
+      }, [config['data']['error']['invalidMove']])
 
     function toggleHelpPopup() {
-        console.log(config)
-        console.log(isWinOpen)
         setisHelpOpen(!isHelpOpen);
     }
 
-    function toggleOutOfBoundsPopup() {
-        setisOutOfBoundsOpen(!isOutOfBoundsOpen);
+    function toggleInvalidMovePopup() {
+        // invalidMove = false;
+        setisInvalidMove(false)
     }
 
     function toggleProcessingPopup() {
         // console.log(isWinOpen)
         setisProcessingOpen(!isProcessingOpen);
     }
+
+    
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -254,17 +261,18 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                             handleClose={toggleProcessingPopup}
                                         />
                                         }
-                                        {isOutOfBoundsOpen && <Popup 
+                                        {isInvalidMove && <Popup
                                             content={
                                                 <>
-                                                    <div style={{textAlign: 'center'}}>
-                                                        <h1 style={{color: 'red'}}>Out of bounds!</h1>
-                                                        <h3>These directions move the character to an inaccessible location.</h3>
+                                                    <div style={{alignItems: 'center'}}>
+                                                        <h1 style={{textAlign: 'center', color: 'red'}}>Out Of Bounds!</h1>
+                                                        <h3 style={{textAlign: 'center'}}>The location you are trying to move to is out of bounds.</h3>
+                                                        <h3 style={{textAlign: 'center'}}>Try moving the character somewhere else.</h3>
                                                     </div>
                                                 </>
                                             }
-                                            handleClose={toggleOutOfBoundsPopup}
-                                        />
+                                            handleClose={toggleInvalidMovePopup}
+                                        />                                          
                                         }
                                     </Grid>
                                 </Grid>

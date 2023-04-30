@@ -57,6 +57,8 @@ def kanji_to_romaji(text):
 # Takes list of json objects, and returns list of character indexes where speech confidence is below a threshold (t)
 def eval_errors(json_list, t):
     error_indexes = []
+
+    # Each json object is inspected from last to first
     for x in range(len(json_list)-1, 0, -1):
         if (json_list[x]['speech']['tokens'][0]['start'] != json_list[x-1]['speech']['tokens'][0]['start']) and (json_list[x]['speech']['tokens'][0]['end'] != json_list[x-1]['speech']['tokens'][0]['end']):
             text_end_index_high = len(json_list[x]['text'])
@@ -65,6 +67,7 @@ def eval_errors(json_list, t):
             text_end_index_low = len(json_list[x-1]['text'])
             conf_low = json_list[x-1]['speech']['tokens'][0]['confidence']
 
+            # Compare confidence of text section with threshold
             if abs(conf_high - conf_low) < t:
                 error_indexes.extend([y for y in range(text_end_index_low, text_end_index_high)])
 
