@@ -8,6 +8,7 @@ import os
 import sys
 from pathlib import Path
 path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
+# path = '/usr/src/app'
 sys.path.insert(0, path)
 
 from speech import game_structs
@@ -39,8 +40,6 @@ class API:
         gameFactory.new_game()
         gameFactory.save_game_state()
         config = gameFactory.game.to_json()
-        print("New game:")
-        print(config)
         return {
             'message': config
         }
@@ -60,15 +59,14 @@ class API:
         request.files['file'].save(audio_location)
         myspeechlocation = os.path.join(path, "speech", "voice.mp3")
 
-        os.remove(myspeechlocation)
-
         text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
+
+        os.remove(myspeechlocation)
 
         # Display error message if no audio detected
         if text == "":
             gameFactory.game.update_data(None, None, None, {'a': True, 'b':[]})
             config = gameFactory.game.to_json()
-            print(config)
             return {
                 'message': config
             } 

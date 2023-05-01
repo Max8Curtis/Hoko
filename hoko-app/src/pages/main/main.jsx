@@ -48,7 +48,16 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     let mapImageDisplayWidth = 700;
     let mapImageDisplayHeight = (mapImageDisplayWidth / mapImageWidth) * mapImageHeight
 
+    function SwitchDisplayType(str) {
+        if (str == 'kanji') {
+            return 'romaji'
+        } else {
+            return 'kanji'
+        }
+    }
+
     function Capitalize(str) {
+        str = SwitchDisplayType(str)
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
