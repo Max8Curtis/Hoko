@@ -23,7 +23,7 @@ Include a .env file in top level, containing a wit.ai access token. Format is as
 
 GENERATE_SOURCEMAP=false
 
-WIT_ACCESS_TOKEN=<Personal token>
+WIT_ACCESS_TOKEN=`Personal token`
   
 API_ENDPOINT=https://api.wit.ai/
   
