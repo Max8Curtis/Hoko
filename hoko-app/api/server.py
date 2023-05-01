@@ -8,6 +8,7 @@ import os
 import sys
 from pathlib import Path
 path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
+# path = '/usr/src/app'
 sys.path.insert(0, path)
 
 from speech import game_structs
@@ -39,8 +40,6 @@ class API:
         gameFactory.new_game()
         gameFactory.save_game_state()
         config = gameFactory.game.to_json()
-        print("New game:")
-        print(config)
         return {
             'message': config
         }
@@ -55,18 +54,19 @@ class API:
 
     @app.route('/audio', methods=['POST'])
     def get_audio():
+        # Get audio file
         audio_location = os.path.join(path, "speech", request.files['file'].filename)
         request.files['file'].save(audio_location)
         myspeechlocation = os.path.join(path, "speech", "voice.mp3")
 
         text, json_list = recorder.recognize_speech(audio_location, None, structure.Stack())
-        print(text)
+
+        os.remove(myspeechlocation)
 
         # Display error message if no audio detected
         if text == "":
             gameFactory.game.update_data(None, None, None, {'a': True, 'b':[]})
             config = gameFactory.game.to_json()
-            print(config)
             return {
                 'message': config
             } 
@@ -75,9 +75,7 @@ class API:
 
         # Predict move for each phrase in the text, then apply move sequentially
         phrases = convert_text.split_text(nlp, text)
-        print(phrases)
         moves = convert_text.predict(nlp, phrases)
-        print(moves)
         new_row, new_col, new_dir, valid_move = gameFactory.game.make_moves(moves)
 
         if valid_move:  
@@ -91,10 +89,15 @@ class API:
                 # Obtain list of characters where confidence is below the threshold
                 error_chars = structure.eval_errors(json_list, 0.2)
 
-            gameFactory.game.update_data(display_text, text, display_type, {'display_error': False, 'error_chars': error_chars})
-            gameFactory.save_game_state()
+        
+            gameFactory.game.update_data(display_text, text, display_type, {'display_error': False, 'error_chars': error_chars, 'invalid_move': False})
+        else:
+            gameFactory.game.update_data(None, None, None, {'display_error': None, 'error_chars': None, 'invalid_move': True})
+
+        gameFactory.save_game_state()
         config = gameFactory.game.to_json()
-        print(config)
+        
+        # Return updated game configuration
         return {
             'message': config
         }
@@ -103,10 +106,12 @@ class API:
     @app.route('/switch', methods=['POST'])
     def switch_kanji():
         data = json.loads(request.data)
+
+        # Transliterate text if written in pure Japanese
         if data['data']['displayType'] == 'kanji':
             romaji_text = structure.kanji_to_romaji(data['data']['kanjiText'])
 
-        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': data['data']['error']['displayError'], 'error_chars':data['data']['error']['errorChars']})
+        gameFactory.game.update_data(romaji_text, data['data']['kanjiText'], 'romaji', {'display_error': data['data']['error']['displayError'], 'error_chars':data['data']['error']['errorChars'], 'invalid_move':data['data']['error']['invalidMove']})
         config = gameFactory.game.to_json()
         return {
             'message': config

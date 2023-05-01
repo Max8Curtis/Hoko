@@ -114,7 +114,6 @@ def run_model():
     nlp = load_module()
     textcat, nlp = add_model(nlp)
     nlp = train(textcat, nlp)
-    # move = predict(nlp, '100メートル行ってください')
     nlp.to_disk(os.path.join(os.getcwd(), 'model'))
 
 # run_model()

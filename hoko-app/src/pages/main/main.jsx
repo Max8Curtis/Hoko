@@ -17,7 +17,8 @@ import micImage from '../../assets/mic.png'
 import helpImage from '../../assets/help_icon.png'
 import undoImage from '../../assets/undo_icon.png'
 import stopImage from '../../assets/mic_stop.png'
-import mapImage from '../../assets/map/map_2.png'
+import mapImage1 from '../../assets/map/map_2.png'
+import mapImage2 from '../../assets/map/map_3.png'
 import charImage from '../../assets/map/character_1.png'
 import startImage from '../../assets/start_icon.png'
 
@@ -39,15 +40,34 @@ import Shrine from '../../assets/map/shrine.png'
 
 import white_square from '../../assets/white_square.png'
 import switchBaseClasses from '@mui/material/internal/switchBaseClasses';
+import { red } from '@mui/material/colors';
 
-function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup}) {
+function Main({start, stop, recording, audioURL, config, reset, undo, switchText, startGame, gameStarted, processing, winPopup, invalidMove}) {
     let mapImageHeight = 770;
     let mapImageWidth = 1070;
     let mapImageDisplayWidth = 700;
     let mapImageDisplayHeight = (mapImageDisplayWidth / mapImageWidth) * mapImageHeight
 
+    function SwitchDisplayType(str) {
+        if (str == 'kanji') {
+            return 'romaji'
+        } else {
+            return 'kanji'
+        }
+    }
+
     function Capitalize(str) {
+        str = SwitchDisplayType(str)
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    const maps = {
+        "1": {
+            "img": mapImage1
+        },
+        "2": {
+            "img": mapImage2
+        }
     }
 
     // TODO: Change page to get targets struct from API whenever neeeded, instead of storing here
@@ -107,19 +127,28 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
     const [isHelpOpen, setisHelpOpen] = useState(false);
     const [isWinOpen, setisWinOpen] = useState(config['game_won']);
     const [isProcessingOpen, setisProcessingOpen] = useState(processing);
+    const [isInvalidMove, setisInvalidMove] = useState(config['data']['error']['invalidMove']);
+    const [isInvalidMovePopupOpen, setisInvalidMovePopupOpen] = useState(isInvalidMove);
+
+    useEffect(() => {
+        setisInvalidMove(config['data']['error']['invalidMove'])
+      }, [config['data']['error']['invalidMove']])
 
     function toggleHelpPopup() {
-        console.log(config)
-        console.log(isWinOpen)
         setisHelpOpen(!isHelpOpen);
     }
 
-
+    function toggleInvalidMovePopup() {
+        // invalidMove = false;
+        setisInvalidMove(false)
+    }
 
     function toggleProcessingPopup() {
         // console.log(isWinOpen)
         setisProcessingOpen(!isProcessingOpen);
     }
+
+    
 
     return (
         <Box sx={{ height: '100%' }} style={{ backgroundColor: "#D2E3DF" }}>
@@ -176,10 +205,12 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                                         <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                                                             <h2>How to play</h2>
                                                             <br></br>
-                                                            <p>1. Press Start - a random target will be generated</p>
-                                                            <p>2. Press Speak - speak directions in Japanese to move the character around the map towards the target</p>
+                                                            <p>1. Press <i>Start</i> - a random target and map will be generated</p>
+                                                            <p>2. Press <i>Speak</i> - speak directions in Japanese to move the character around the map towards the target</p>
                                                             <p>     (Saying "go forward" will move the character forward by one square)</p>
-                                                            <p>3. When the character is facing the target, you have completed the game!</p>
+                                                            <p>3. Press <i>Stop</i> - this will stop recording your voice and completes the turn</p>
+                                                            <p></p>
+                                                            <p>When the character is facing the target, you have completed the game!</p>
                                                             <h3>Pronunciation</h3>
                                                             <p>When you speak, your speech will be transcribed to text and displayed in the box below the map.</p>
                                                             <p style={{textAlign: 'center'}}>If part of your speech has unclear pronunciation, the relevant characters will be highlighted in the box below the map. You can then retry the sentence until the pronunciation is perfect!</p>
@@ -239,12 +270,25 @@ function Main({start, stop, recording, audioURL, config, reset, undo, switchText
                                             handleClose={toggleProcessingPopup}
                                         />
                                         }
+                                        {isInvalidMove && <Popup
+                                            content={
+                                                <>
+                                                    <div style={{alignItems: 'center'}}>
+                                                        <h1 style={{textAlign: 'center', color: 'red'}}>Out Of Bounds!</h1>
+                                                        <h3 style={{textAlign: 'center'}}>The location you are trying to move to is out of bounds.</h3>
+                                                        <h3 style={{textAlign: 'center'}}>Try moving the character somewhere else.</h3>
+                                                    </div>
+                                                </>
+                                            }
+                                            handleClose={toggleInvalidMovePopup}
+                                        />                                          
+                                        }
                                     </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={7.4}>
-                            <Map image={mapImage} character={charImage} width={700} height={mapImageDisplayHeight} charRow={config['char_row']} charCol={config['char_col']} charDir={config['char_dir']} style={{ paddingLeft: 50 }} />
+                            <Map image={maps[config['map']]['img']} character={charImage} width={700} height={mapImageDisplayHeight} charRow={config['char_row']} charCol={config['char_col']} charDir={config['char_dir']} style={{ paddingLeft: 50 }} />
                         </Grid>
                         <Grid item xs={2.3}>
                             <Grid container direction="column" justifyContent="space-evenly" alignItems="center">

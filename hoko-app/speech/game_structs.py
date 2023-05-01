@@ -24,13 +24,20 @@ class Data:
     def update(self, display_text, kanji_text, display_type, error):
         display_error = list(error.values())[0]
         error_chars = list(error.values())[1]
+        invalid_move = list(error.values())[2]
+        if display_error == None:
+            display_error = self.error.display_error
+        if error_chars == None:
+            error_chars = self.error.error_chars
+        if invalid_move == None:
+            invalid_move = self.error.invalid_move
         if not(display_text == None and kanji_text == None and display_type == None):      
             self.display_text = display_text
             self.kanji_text = kanji_text
             self.display_type = display_type
-            self.error.update(display_error, error_chars)
+            self.error.update(display_error, error_chars, invalid_move)
         else:
-            self.error.update(display_error, error_chars)
+            self.error.update(display_error, error_chars, invalid_move)
 
 
     def to_json(self):
@@ -45,15 +52,18 @@ class Error:
     def __init__(self):
         self.display_error = False
         self.error_chars = []
+        self.invalid_move = False
 
-    def update(self, display_error, error_chars):
+    def update(self, display_error, error_chars, invalid_move):
         self.display_error = display_error
         self.error_chars = error_chars
+        self.invalid_move = invalid_move
 
     def to_json(self):
         return {
             'displayError': self.display_error,
-            'errorChars': self.error_chars
+            'errorChars': self.error_chars,
+            'invalidMove': self.invalid_move
         }
 
 class Map:
@@ -67,7 +77,10 @@ class Map:
         self.update_map(chosen_target_row, chosen_target_col, "T")
 
     def choose_map(self):
-        return random.choice(list(self.maps['objects']['maps']))
+        print(list(self.maps['objects']['maps']))
+        map = random.choice(list(self.maps['objects']['maps']))
+        print(map)
+        return map
 
     def choose_target(self):
         return random.choice(list(self.maps['objects']['maps'][str(self.chosen_map)]['targets']))
@@ -146,6 +159,7 @@ class Game:
         # self.error = Error()
         self.data = Data("", "", 'kanji')
         self.move_count = 0
+        self.out_of_bounds = False
 
     def place_character(self):
         map_data = self.map.get_map()['layout']
@@ -160,8 +174,8 @@ class Game:
     def update_data(self, display_text, kanji_text, display_type, error):
         self.data.update(display_text, kanji_text, display_type, error)
 
-    def update_error(self, display_error, error_chars):
-        self.error.update(display_error, error_chars)
+    def update_error(self, display_error, error_chars, invalid_move):
+        self.error.update(display_error, error_chars, invalid_move)
     
     def update_game_start(self, val):
         self.at_game_start = val
@@ -192,6 +206,12 @@ class Game:
     
     def get_errors(self):
         return self.data.erro
+
+    def get_out_of_bounds(self):
+        return self.out_of_bounds
+
+    def set_out_of_bounds(self, val):
+        self.out_of_bounds = val
 
     def valid_move(self, node_at_new_loc):
         valid_move = False
@@ -226,6 +246,7 @@ class Game:
             else:
                 self.char.set_location(new_row, new_col)
                 self.char.set_rotation(new_dir)
+        
         return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
     # Performs move if valid
@@ -246,36 +267,44 @@ class Game:
             valid_move = True
         elif move == "behind":
             self.char.rotate(180)
+            row, col, dir, valid_move = self.move_forward(curr_char_row, curr_char_col, curr_char_dir)
             valid_move = True
         elif move == "forward":
-            if curr_char_dir == 0 and curr_char_row >= 1:
-                new_row = curr_char_row-1
-                new_col = curr_char_col              
-            elif curr_char_dir == 90 and curr_char_col <= self.map.get_max_col():
-                new_row = curr_char_row
-                new_col = curr_char_col+1
-            elif curr_char_dir == 180 and curr_char_row <= self.map.get_max_row():
-                new_row = curr_char_row+1
-                new_col = curr_char_col
-            elif curr_char_dir == 270 and curr_char_col >= 1:
-                new_row = curr_char_row
-                new_col = curr_char_col-1
+            row, col, dir, valid_move = self.move_forward(curr_char_row, curr_char_col, curr_char_dir)
+            if not valid_move:
+                self.set_out_of_bounds(True)
 
-            # Check that move is within map boundary            
-            if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
-                node_at_new_loc = self.map.get_node_at(new_row, new_col)
-                print(node_at_new_loc)
-                valid_move = self.valid_move(node_at_new_loc)
+        return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
-            if valid_move:
-                self.char.set_location(new_row, new_col)
+    def move_forward(self, curr_char_row, curr_char_col, curr_char_dir):
+        new_row = curr_char_row
+        new_col = curr_char_col
+        if curr_char_dir == 0 and curr_char_row >= 1:
+            new_row = curr_char_row-1
+            new_col = curr_char_col              
+        elif curr_char_dir == 90 and curr_char_col <= self.map.get_max_col():
+            new_row = curr_char_row
+            new_col = curr_char_col+1
+        elif curr_char_dir == 180 and curr_char_row <= self.map.get_max_row():
+            new_row = curr_char_row+1
+            new_col = curr_char_col
+        elif curr_char_dir == 270 and curr_char_col >= 1:
+            new_row = curr_char_row
+            new_col = curr_char_col-1
 
-                # Return current square to original node when character is moved
-                self.map.revert_location_to_node(curr_char_row, curr_char_col)
-                if node_at_new_loc == "T":
-                    # game_winning_move = True
-                    self.game_won = True
-            # print(f"Row: {self.char.get_row()}")
+        # Check that move is within map boundary            
+        if new_row <= self.map.get_max_row() and new_col <= self.map.get_max_col():
+            node_at_new_loc = self.map.get_node_at(new_row, new_col)
+            valid_move = self.valid_move(node_at_new_loc)
+
+        if valid_move:
+            self.char.set_location(new_row, new_col)
+
+            # Return current square to original node when character is moved
+            self.map.revert_location_to_node(curr_char_row, curr_char_col)
+            if node_at_new_loc == "T":
+                self.game_won = True
+ 
         return self.char.get_row(), self.char.get_col(), self.char.get_direction(), valid_move
 
     def to_json(self):
@@ -288,16 +317,11 @@ class Game:
             'char_dir': self.char.get_direction(),
             'game_won': self.get_game_won(),
             'at_game_start': self.get_game_start(),
+            'out_of_bounds': self.get_out_of_bounds(),
             'data': self.data.to_json()
         }
 
 class GameFactory:
-
-    ###
-    #   Could implement a 'move counter' for knowing when at_game_start is true, increment/decrement so check == 0?
-    #
-    ###
-
     def __init__(self):
         self.game_exists = False
 

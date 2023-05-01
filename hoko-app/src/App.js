@@ -20,7 +20,7 @@ class App extends React.Component {
       isBlocked: false,
       config: {
           target: "",
-          map: "",
+          map: "1",
           char_row: 4,
           char_col: 3,
           char_dir: 0,
@@ -32,18 +32,25 @@ class App extends React.Component {
             displayType: "kanji",
             error: {
               displayError: false,
-              errorChars: []
+              errorChars: [],
+              invalidMove: false
             }
           }
       },
-      game_started: false // Set true when `start` button is pressed
+      invalidMove: false,
+      game_started: false, // Set true when `start` button is pressed
     };
   }
+  
 
   toggleWinPopup = () => {
     this.startGame()
   };
 
+
+  toggleInvalidMovePopup = () => {
+    this.setState({invalidMove: !this.state.invalidMove})
+  }
 
   assignState = (data) => {
     console.log(data)
@@ -64,13 +71,14 @@ class App extends React.Component {
       at_game_start: data.message['at_game_start'],
       data: newDataConfig
     }
+    this.setState({invalidMove: data.message['data']['error']['invalidMove']}, () => console.log(this.state.config['data']['error']['invalidMove']))
     this.setState({config: newConfig })
   };
 
-  // This function adds styling to highlight errored characters in the user's speech
+  /**
+   * Add styling to highlight errored characters in the user's speech
+   */  
   getEditedText = (text, error_chars) => {
-    console.log(text)
-    console.log(error_chars)
     var s = text.split("");
     var s_new = "";
     for (var i = 0; i < s.length; i++) {
@@ -124,14 +132,13 @@ class App extends React.Component {
       body: form
     })
     .then(async (res) => {
-      console.log("HI")
       const data = await res.json();
-      console.log("BYE")
       this.state.isProcessing = false;
       var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
-      console.log(edited_text);
       data.message['data']['displayText'] = edited_text;
-      this.assignState(data)
+      this.assignState(data);
+      console.log(this.state.invalidMove);
+
       if (!res.ok) {
         const err = (data && data.message) || res.status;
         return Promise.reject(err);
@@ -160,36 +167,7 @@ class App extends React.Component {
         const blobURL = URL.createObjectURL(blob)
         this.setState({ blobURL, isRecording: false });
         this.sendAudio(formData)
-        
       }).catch((e) => console.log(e));
-    
-    /**
-     * Turn audio blob into form to be sent in request body
-     */
-    // const audioBlob = await fetch(this.state.blobURL).then((r) => r.blob());
-    // const audioFile = new File([audioBlob], 'voice.mp3', { type: 'audio/mp3' });
-    // const formData = new FormData(); // preparing to send to the server
-    // formData.append('file', file);  // preparing to send to the server
-
-    // fetch("/audio", {
-    //   method: 'POST',
-    //   mode: 'cors',
-    //   body: formData
-    // })
-    // .then(async (res) => {
-    //   const data = await res.json();
-    //   var edited_text = this.getEditedText(data.message['data']['displayText'], data.message['data']['error']['errorChars']);
-    //   console.log(edited_text);
-    //   data.message['data']['displayText'] = edited_text;
-    //   this.assignState(data)
-    //   if (!res.ok) {
-    //     const err = (data && data.message) || res.status;
-    //     return Promise.reject(err);
-    //   }
-    // })
-    // .catch((err) => {
-    //   console.log(err);
-    // });
   };
 
   resetGame = () => {
@@ -257,7 +235,7 @@ class App extends React.Component {
   render(){
     return (
       <>
-        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} />
+        <Main start={this.start} stop={this.stop} recording={this.state.isRecording} audioURL={this.state.blobURL} config={this.state.config} reset={this.resetGame} undo={this.undoMove} switchText={this.switch} startGame={this.startGame} gameStarted={this.state.game_started} processing={this.state.isProcessing} winPopup={this.toggleWinPopup} invalidMove={this.state.invalidMove} />
       </>
     );
   }
