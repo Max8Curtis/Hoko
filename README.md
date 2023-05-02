@@ -6,6 +6,8 @@ Japanese speech-controlled maze-based game
 
 ## Start Web-app:
 
+node.js is required to create the web-app, as node_modules must be installed.
+
 1. Navigate to hoko-app/
 2. `npm start`
 
