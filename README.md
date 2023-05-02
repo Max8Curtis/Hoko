@@ -19,6 +19,8 @@ The API (server.py) runs on a default port of 5000. To change the port, edit the
 2. `docker build -t hoko-backend .`
 3. `docker run -p 5000:5000 --env-file .env hoko-backend`
 
+# Configuration and Changes
+
 ## External API Connection
 
 Include a .env file in top level, containing a wit.ai access token. Format is as follows:
