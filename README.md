@@ -1,6 +1,6 @@
-![alt text](https://github.com/Max8Curtis/Hoko/blob/main/hoko-app/arc/assets/map/shrine.png?raw=true)
-
 # Hoko
+
+![alt text](https://raw.github.com/Max8Curtis/Hoko/main/hoko-app/src/assets/map/shrine.png?raw=true)
 
 Japanese speech-controlled maze-based game
 
